@@ -108,7 +108,7 @@ while True:
         final_image = viewer.draw_ball_pixel(final_image, xworld, yworld, zworld, radius/3.3333)
 
     # Write as image
-    cv2.imwrite('webserver/tmp/pipe1/image.jpg', final_image)
+    cv2.imwrite('webserver/tmp/image1.jpg', final_image)
 
     # Show image
     # cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)

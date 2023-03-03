@@ -1,8 +1,9 @@
 # Imports
 import os
-import numpy as np
 import cv2
 import time
+import config
+import numpy as np
 from flask import Flask, Response, render_template
 
 # Create app
@@ -13,16 +14,31 @@ def gen(stream_id):
      while True:
                 
         # Read the image from the fifo
-        frame = cv2.imread('webserver/tmp/pipe' + str(stream_id) + '/image.jpg')
-        if frame is None:
-            continue
+        file = 'webserver/tmp/image' + str(stream_id) + '.jpg'
+        #with open(file, 'rb') as f:
+            #check_chars = f.read()[-2:]
+            #if check_chars != b'\xff\xd9':
+                #print('Not complete image')
+            #else:
+        frame = cv2.imread(file)
+
+        # Check if there is a frame
+        if frame is None: continue
+
+        # Resize image to fit screen
+        frame = cv2.resize(frame, config.screen_size)     
 
         # Encode the frame as a JPEG image
         ret, jpeg = cv2.imencode('.jpg', frame)
+
+        # Check if encoding went well
+        if not ret: continue
+
+        # Convert image to bytes
         frame = jpeg.tobytes()
 
         # Yield the frame for display in the app
-        time.sleep(0.1)
+        time.sleep(config.deltat)
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 # Main route
@@ -31,21 +47,9 @@ def home():
     return render_template('home.html')
 
 # Route to streams
-@app.route("/video_feed1")
-def video_feed():
-    return Response(gen(1), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route("/video_feed2")
-def video_feed():
-    return Response(gen(2), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route("/video_feed3")
-def video_feed():
-    return Response(gen(3), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route("/video_feed4")
-def video_feed():
-    return Response(gen(4), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route("/video_feed/<int:stream_id>")
+def video_feed(stream_id):
+    return Response(gen(stream_id), mimetype='multipart/x-mixed-replace; boundary=frame')
     
 # Main
 if __name__ == '__main__':

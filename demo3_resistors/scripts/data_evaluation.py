@@ -8,79 +8,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 from decode import decode
 from sklearn.preprocessing import LabelEncoder 
+from preprocessing import *
 
 # Load data
-df = pd.read_csv("demo3_resistors/color_data")
+df = pd.read_csv("demo3_resistors/data/color_data.csv")
 
 # Encode categorical labels
 labelencoder = LabelEncoder() 
 df['Class'] = labelencoder.fit_transform(df['Class'])
 
 # Load model
-filename = 'demo3_resistors/model.sav'
+filename = 'demo3_resistors/data/model.sav'
 model = pickle.load(open(filename, 'rb'))
 
 # Loop over every image
-for i in os.listdir('demo3_resistors/data'):
+for i in glob.glob('demo3_resistors/data/images/*jpg'):
 
     # Read image
-    image = cv2.imread('demo3_resistors/data/' + i)
+    image = cv2.imread(i)
 
     # Read label
-    label = i.split('_')[1][0:-4]
+    label = i.split('/')[-1].split('_')[1][0:-4]
 
-    # Convert to RGB
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # Extract resistor
+    cropped = extract_resistor(image)
 
-    # Convert to gray, and threshold
-    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Extract color bands
+    color_bands = extract_color_bands(cropped)
 
-    # Threshold background
-    _, threshed = cv2.threshold(image_gray, 230, 255, cv2.THRESH_BINARY_INV)
-
-    # Morphological transformations to remove sticks
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20,20))
-    morphed_open = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel)
-    morphed_close = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
-
-    # Find contour of resistor
-    maxcontour = max(cv2.findContours(morphed_close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2], key=cv2.contourArea)
-
-    # Get minimal area rectangle
-    rect = cv2.minAreaRect(maxcontour)
-
-    # Get rectangle properties
-    angle = rect[2]
-    rows, cols = image.shape[0], image.shape[1]
-
-    # Rotate image
-    M = cv2.getRotationMatrix2D((cols/2,rows/2), angle-90, 1)
-    img_rot = cv2.warpAffine(image,M,(cols,rows))
-
-    # Rotate bounding box 
-    box = cv2.boxPoints((rect[0], rect[1], angle))
-    pts = np.intp(cv2.transform(np.array([box]), M))[0]    
-    pts[pts < 0] = 0
-
-    # Cropping
-    cropped = img_rot[pts[0][1]+20:pts[3][1]-100, pts[0][0]+40:pts[2][0]-40]
-
-    # Bilateral filtering
-    cropped = cv2.bilateralFilter(cropped, 15, 35, 35)
-
-    # Remove area in between color bands
-    mask = cv2.bitwise_not(cv2.inRange(cropped, np.array([120, 120, 100]), np.array([190, 180, 160])))
-
-    # Find the contours of the color bands
-    contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-
-    # Sort contours from left to right
-    sorted_ctrs = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[1])
-    sorted_ctrs.reverse()
+    # Stop if the result is wrong
+    if color_bands is None:
+        continue
 
     # Iterate over first three contours
     prediction = ''
-    for j, ctr in enumerate(sorted_ctrs[0:3]):
+    for j, ctr in enumerate(color_bands):
 
         # Get roi
         x,y,w,h = cv2.boundingRect(ctr)

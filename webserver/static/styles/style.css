@@ -1,0 +1,68 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #00407A;
+}
+
+header {
+    background-color: #52BDEC;
+    color: white;
+    text-align: center;
+    margin-bottom: 0;
+    display: flex; /* Add this line */
+    justify-content: space-between; /* Add this line */
+    align-items: center; /* Add this line */
+}
+
+/* Style the logo */
+.logo {
+    height: 50px;
+    margin-right: 1rem; /* Add some spacing */
+    margin-left: 1rem;
+}
+
+/* Style the title container */
+.title-container {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    flex-grow: 1;
+}
+
+/* Style the title */
+.title-container h1 {
+    margin: 0 auto; /* Add this line */
+}
+
+/* Style the button row */
+.button-row {
+    margin-top: 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Style the buttons */
+button {
+    margin-top: 0;
+    padding: 1rem;
+    margin: 0.5rem 0.5rem;
+    background-color: #52BDEC;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #1D8DB0;
+}
+
+/* Style the canvas */
+canvas {
+    display: block;
+    margin: 1rem auto;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 1rem rgba(0,0,0,0.1);
+}

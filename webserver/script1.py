@@ -1,4 +1,4 @@
-# Script 1: generate and write images to /tmp/pipe1
+# Script 1: generate and write images to /tmp
 import cv2
 import time
 
@@ -11,12 +11,7 @@ while True:
     success, frame = cap.read()
 
     # Write as image
-    cv2.imwrite('webserver/tmp/pipe1/image.jpg', frame)
-    
-    # Write as binary
-    with open('webserver/tmp/pipe1/image.raw', 'wb') as f:
-        ret, frame = cv2.imencode('.jpg', frame)
-        f.write(frame.tobytes())
+    cv2.imwrite('tmp/image3.jpg', frame)
 
     # Sleep
-    time.sleep(0.1)
+    time.sleep(0.01)

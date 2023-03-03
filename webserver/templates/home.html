@@ -1,58 +1,62 @@
 <!doctype html>
+
 <html>
   <html>
   <head>
 
     <title>Machine Vision for Quality Control</title>
-
-    <style>
-      body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      h1 {
-        text-align: center;
-      }
-      .button-row {
-        display: flex;
-        justify-content: space-between;
-      }
-      .button {
-        font-size: 1.5em;
-        padding: 10px 20px;
-        border: 2px solid #333;
-        border-radius: 5px;
-        background-color: #eee;
-        cursor: pointer;
-      }
-      canvas {
-        margin-top: 20px;
-        border: 2px solid #333;
-      }
-    </style>
+    <link rel="stylesheet" href="static/styles/style.css">
 
   </head>
 
   <body>
 
-    <h1>Machine Vision for Quality Control</h1>
+    <header>
+      <div class="title-container">
+        <img src="static/logo_mgroup.png" alt="Logo2" class="logo">
+        <h1>Machine Vision for Quality Control</h1>
+        <img src="static/logo_kuleuven.png" alt="Logo1" class="logo">
+      </div>
+    </header>
 
     <div class="button-row">
-      <button onclick="setStream('{{ url_for('video_feed', stream_id='1') }}')">Stream 1</button>
-      <button onclick="setStream('{{ url_for('video_feed', stream_id='2') }}')">Stream 2</button>
-      <button onclick="setStream('{{ url_for('video_feed', stream_id='3') }}')">Stream 3</button>
-      <button onclick="setStream('{{ url_for('video_feed', stream_id='4') }}')">Stream 4</button>
+      <button id="stream1">Demo 1</button>
+      <button id="stream2">Demo 2</button>
+      <button id="stream3">Demo 3</button>
+      <button id="stream4">Demo 4</button>
     </div>
 
-    <img id="video" >
+    <div id=""video-container'>
+      <img id="video" src ="video_feed/1", style="max-width:100%; max-height:100%">
+    </div>
 
     <script>
+
+      // Get references to the HTML elements
       var video = document.getElementById('video');
-      function setStream(stream) {
-        video.src = "{{ url_for('video_feed', stream_id=stream) }}";
-      }
-   </script>
+      var stream1Btn = document.getElementById('stream1');
+      var stream2Btn = document.getElementById('stream2');
+      var stream3Btn = document.getElementById('stream3');
+      var stream4Btn = document.getElementById('stream4');
+  
+      // Set up click event listeners for each button
+      stream1Btn.addEventListener('click', function() {
+        video.src = 'video_feed/1';
+      });
+  
+      stream2Btn.addEventListener('click', function() {
+        video.src = 'video_feed/2';
+      });
+  
+      stream3Btn.addEventListener('click', function() {
+        video.src = 'video_feed/3';
+      });
+  
+      stream4Btn.addEventListener('click', function() {
+        video.src = 'video_feed/4';
+      });
+
+    </script>
 
   </body>
 
