@@ -12,7 +12,6 @@ app = Flask(__name__)
 def gen(stream_id):
      while True:
                 
-        stream_id=1
         # Read the image from the fifo
         frame = cv2.imread('webserver/tmp/pipe' + str(stream_id) + '/image.jpg')
         if frame is None:
@@ -32,9 +31,21 @@ def home():
     return render_template('home.html')
 
 # Route to streams
-@app.route("/video_feed")
+@app.route("/video_feed1")
 def video_feed():
     return Response(gen(1), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/video_feed2")
+def video_feed():
+    return Response(gen(2), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/video_feed3")
+def video_feed():
+    return Response(gen(3), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/video_feed4")
+def video_feed():
+    return Response(gen(4), mimetype='multipart/x-mixed-replace; boundary=frame')
     
 # Main
 if __name__ == '__main__':

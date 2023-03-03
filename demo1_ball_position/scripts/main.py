@@ -5,14 +5,20 @@ import imutils
 import numpy as np
 from collections import deque
 from demo1_ball_position.Camera import Camera
-from demo1_ball_position.Viewer import Viewer
+from demo1_ball_position.Viewer import *
 
 # Create camera object and start camera
 cam = Camera()
 cam.start()
 
 # Create viewer object and set window
-viewer = Viewer()
+window_name = config.window_name
+window_height = config.window_height
+window_width = config.window_width
+
+# Adjust window
+#cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+#cv2.resizeWindow(window_name, window_width, window_height)
 
 # Get HSV calibration params 
 hsvfile = np.load('demo1_ball_position/data/hsv.npy')
@@ -73,10 +79,7 @@ while True:
             # Get pixel depth
             depth_pixel = depth_image[center[1], center[0]]
 
-            print(depth_pixel)
-
             # Transform 2D to 3D camera coordinates
-            print(cam.mtx)
             xcam, ycam, zcam = cam.intrinsic_trans(center, depth_pixel, cam.mtx)
 
             # Plot ball pixel
@@ -86,7 +89,6 @@ while True:
         
     # Exctrinsic calibration
     ret, corners, rvecs, tvecs, ext = cam.extrinsic_calibration(color_image)
-    print(ext)
 
     # Draw chessboard
     if ret:
@@ -109,4 +111,7 @@ while True:
     cv2.imwrite('webserver/tmp/pipe1/image.jpg', final_image)
 
     # Show image
-    viewer.show_image(final_image)
+    # cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    # cv2.resizeWindow(window_name, window_height, window_width)
+    # cv2.imshow(window_name, img)
+    # cv2.waitKey(1)
