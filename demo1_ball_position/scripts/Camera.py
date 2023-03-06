@@ -21,7 +21,7 @@ class Camera:
 		self.align = None
 
 		# Camera calibration properties
-		self.mtx = numpy.load('demo1_ball_position/data/intrinsics1.npy')
+		self.mtx = numpy.load('demo1_ball_position/data/intrinsics.npy')
 		self.dist = numpy.load('demo1_ball_position/data/distortion.npy')
 
 		# Chessboard properties

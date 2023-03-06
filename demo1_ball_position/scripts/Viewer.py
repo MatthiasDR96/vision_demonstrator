@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 # Draw reference axis
-def draw_axes(self, img, mtx, dist, rvecs, tvecs, length):
+def draw_axes(img, mtx, dist, rvecs, tvecs, length):
 
     # Frame axis
     axis = np.float32([[0, 0, 0], [length, 0, 0], [0, length, 0], [0, 0, -length]])
@@ -26,7 +26,7 @@ def draw_axes(self, img, mtx, dist, rvecs, tvecs, length):
     return img
 
 # Draw box
-def draw_cube(self, img, mtx, dist, rvecs, tvecs, x, y, z, size):
+def draw_cube(img, mtx, dist, rvecs, tvecs, x, y, z, size):
 
     # Frame axis
     box = np.float32([[x, y, z], [x+size, y, z], [x+size, y+size, z], [x, y+size, z],
@@ -53,7 +53,7 @@ def draw_cube(self, img, mtx, dist, rvecs, tvecs, x, y, z, size):
     return img
 
 # Show ball, pixel, depth and XYZ
-def draw_ball_pixel(self, image, x, y, z, r):
+def draw_ball_pixel(image, x, y, z, r):
 
     # Project 3D cooridnates
     cv2.putText(image, "X: " + str(int(round(x))) + ' mm', (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)

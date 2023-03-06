@@ -1,11 +1,10 @@
 # Imports
 import cv2
+import time
 import config
-import imutils
 import numpy as np
-from collections import deque
-from demo1_ball_position.Camera import Camera
-from demo1_ball_position.Viewer import *
+from Camera import Camera
+from Viewer import *
 
 # Create camera object and start camera
 cam = Camera()
@@ -15,10 +14,6 @@ cam.start()
 window_name = config.window_name
 window_height = config.window_height
 window_width = config.window_width
-
-# Adjust window
-#cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-#cv2.resizeWindow(window_name, window_width, window_height)
 
 # Get HSV calibration params 
 hsvfile = np.load('demo1_ball_position/data/hsv.npy')
@@ -30,6 +25,9 @@ upper_color = np.array([hsvfile[1], hsvfile[3], hsvfile[5]])
 # Loop
 while True:
 
+    # Get start time
+    t1 = time.time()
+
     # Read frame
     color_image, depth_image = cam.read()
 
@@ -37,22 +35,19 @@ while True:
     final_image = color_image.copy()
 
     # Gaussian blur
-    blurred_image = cv2.GaussianBlur(color_image, (7, 7), 0)
+    #blurred_image = cv2.GaussianBlur(color_image, (7, 7), 0)
 
     # Convert to hsv color space
-    hsv = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
     # Get mask
     mask = cv2.inRange(hsv, lower_color, upper_color)
 
     # Erode to close gaps
-    mask = cv2.erode(mask, None, iterations=2)
+    #mask = cv2.erode(mask, None, iterations=2)
 
     # Dilate to get original size
-    mask = cv2.dilate(mask, None, iterations=2)
-
-    # Apply mask to image
-    res = cv2.bitwise_and(color_image, color_image, mask=mask)
+    #mask = cv2.dilate(mask, None, iterations=2)
 
     # Find contours
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -98,20 +93,23 @@ while True:
 
         # Plot chessboard
         final_image = cv2.drawChessboardCorners(final_image, (cam.b, cam.h), corners, ret)
-        final_image = viewer.draw_axes(final_image, cam.mtx, cam.dist, rvecs, tvecs, 3*config.chessboard_size)
+        final_image = draw_axes(final_image, cam.mtx, cam.dist, rvecs, tvecs, 3*config.chessboard_size)
 
     # Rotate image
     final_image = cv2.rotate(final_image, cv2.ROTATE_180)
 
     # Show ball and coordinates
     if ret and depth_pixel:
-        final_image = viewer.draw_ball_pixel(final_image, xworld, yworld, zworld, radius/3.3333)
+        final_image = draw_ball_pixel(final_image, xworld, yworld, zworld, radius/3.3333)
 
     # Write as image
     cv2.imwrite('webserver/tmp/image1.jpg', final_image)
 
-    # Show image
-    # cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    # cv2.resizeWindow(window_name, window_height, window_width)
-    # cv2.imshow(window_name, img)
-    # cv2.waitKey(1)
+    # Print
+    print("Demo 1 - 3D ball detection - running")
+
+    # Get end time
+    t2 = time.time()
+
+    # Sleep
+    if (t2-t1) < 0.5: time.sleep(0.5 - (t2-t1))
