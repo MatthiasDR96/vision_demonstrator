@@ -1,57 +1,56 @@
 # Imports
+import os
 import cv2
 import time
 import numpy
 import config
+from ftplib import FTP
 import pyrealsense2 as realsense
 
-# Connect camera
-conn = realsense.pipeline()
+# File name
+filematch = '*.jpg'
+target_dir = "images"
 
-# Camera setup params
-color_resolution = config.color_resolution
-depth_resolution = config.depth_resolution
-frames_per_second = config.frames_per_second
-id = config.id
-
-# Config camera
-conf = realsense.config()
-conf.enable_device(id)
-conf.enable_stream(realsense.stream.depth, depth_resolution[0], depth_resolution[1], realsense.format.z16, frames_per_second)
-conf.enable_stream(realsense.stream.color, color_resolution[0], color_resolution[1], realsense.format.bgr8, frames_per_second)
-		
-# Start streaming
-conn.start(conf)
-
-# Align images
-align = realsense.align(realsense.stream.color)
-
-# Data generation loop
+# Loop
 while True:
 
-    # Wait for image
-    frames = conn.wait_for_frames()
+    # Get start time
+    t1 = time.time()
 
-    # Align images
-    aligned_frames = align.process(frames)
+    # Start file transfer
+    ftp = FTP("10.5.5.100")
+    ftp.login()
+    ftp.cwd("RAMDisk")
+    parent = ftp.pwd()
 
-    # Retreive images
-    color_frame = aligned_frames.get_color_frame()
+    # Get filenames within the directory
+    directories = ftp.nlst()
 
-    # Convert to arrays
-    color = numpy.asanyarray(color_frame.get_data())
+    # Loop over the directories
+    for directory in directories:
+        ftp.cwd(parent +'/'+ directory)
+        for image in ftp.nlst():
+            local_filename = os.path.join('images', image)
+            file = open(local_filename, 'wb')
+            ftp.retrbinary('RETR '+ image, file.write)
+            file.close()
+            ftp.delete(image)
+        try:
+            ftp.rmd(parent +'/'+ directory)
+        except:
+            pass
+
+    # Quit file transfer
+    ftp.quit() 
 
     # Write as image
-    cv2.imwrite('webserver/tmp/image2.jpg', color)
-    time.sleep(0.01)
+    cv2.imwrite('webserver/tmp/image2.jpg', file)
 
     # Print
     print("Demo 2 - sawblade - running")
 
-    # Sleep
-    time.sleep(0.01)
+    # Get end time
+    t2 = time.time()
 
-    # Show image
-    #cv2.namedWindow('Data generation', cv2.WINDOW_NORMAL)
-    #cv2.imshow('Data generation', color)
-    #k  = cv2.waitKey(1)
+    # Sleep
+    if (t2-t1) < 0.5: time.sleep(0.5 - (t2-t1))
