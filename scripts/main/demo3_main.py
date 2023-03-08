@@ -4,17 +4,21 @@ import time
 import yaml
 import pickle
 import pandas as pd
+import paho.mqtt.client as mqtt
 from vision_demonstrator.decode import *
 from vision_demonstrator.Camera import Camera
 from vision_demonstrator.preprocessing import *
 from sklearn.preprocessing import LabelEncoder 
 
 # Load params
-with open("config/demo3_config.yaml", 'r') as stream:
-    config = yaml.safe_load(stream)
+with open("config/demo3_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
 
 # Create camera object
 cam = Camera('Basler', 0, 0, 0, 0)
+
+# Init MQTT server
+client = mqtt.Client()
+client.connect("mqtt.eclipseprojects.io")
 
 # Load data
 df = pd.read_csv("data/color_data.csv")
@@ -35,6 +39,9 @@ while True:
 
     # Get frame
     image, _ = cam.read()
+
+    # Check frame
+    if image is None: continue
 
     # Convert to RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -80,6 +87,10 @@ while True:
 
     # Write as image
     cv2.imwrite('webserver/tmp/image3.jpg', image)
+    
+    # Publish data
+    data = cv2.imencode('.jpg', image)[1].tobytes()
+    client.publish("demo3_image", data)
 
     # Print
     print("Demo 3 - resistors - running")

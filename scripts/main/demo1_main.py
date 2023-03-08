@@ -3,16 +3,20 @@ import cv2
 import time
 import yaml
 import numpy as np
+import paho.mqtt.client as mqtt
 from vision_demonstrator.Viewer import *
 from vision_demonstrator.Camera import Camera
 from vision_demonstrator.camera_callibration import *
 
 # Load params
-with open("config/demo1_config.yaml", 'r') as stream:
-    config = yaml.safe_load(stream)
+with open("config/demo1_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
 
 # Create camera object
 cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
+
+# Init MQTT server
+client = mqtt.Client()
+client.connect("mqtt.eclipseprojects.io")
 
 # Get HSV calibration params 
 hsvfile = np.load('data/hsv.npy')
@@ -101,6 +105,10 @@ while True:
 
     # Write as image
     cv2.imwrite('webserver/tmp/image1.jpg', final_image)
+
+    # Publish data
+    data = cv2.imencode('.jpg', final_image)[1].tobytes()
+    client.publish("demo1_image", data)
 
     # Print
     print("Demo 1 - 3D ball detection - running")

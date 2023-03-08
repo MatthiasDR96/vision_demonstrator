@@ -2,14 +2,18 @@
 import cv2
 import time
 import yaml
+import paho.mqtt.client as mqtt
 from vision_demonstrator.Camera import Camera
 
 # Load params
-with open("config/demo4_config.yaml", 'r') as stream:
-    config = yaml.safe_load(stream)
+with open("config/demo4_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
 
 # Create camera object
 cam = Camera("RealSense", config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
+
+# Init MQTT server
+client = mqtt.Client()
+client.connect("mqtt.eclipseprojects.io")
 
 # Loop
 while True:
@@ -24,6 +28,10 @@ while True:
 
     # Write as image
     cv2.imwrite('webserver/tmp/image4.jpg', color_image)
+
+    # Publish data
+    data = cv2.imencode('.jpg', color_image)[1].tobytes()
+    client.publish("demo4_image", data)
 
     # Print
     print("Demo 4 - classification - running")

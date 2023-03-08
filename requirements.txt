@@ -2,6 +2,7 @@ yaml
 numpy
 scipy
 pypylon
+paho-mqtt
 matplotlib
 scikit-learn
 pyrealsense2

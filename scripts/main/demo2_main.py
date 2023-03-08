@@ -1,8 +1,13 @@
 # Imports
 import cv2
 import time
-import matplotlib.pyplot as plt
 from ftplib import FTP
+import paho.mqtt.client as mqtt
+import matplotlib.pyplot as plt
+
+# Init MQTT server
+client = mqtt.Client()
+client.connect("mqtt.eclipseprojects.io")
 
 # Loop
 while True:
@@ -29,8 +34,7 @@ while True:
         for image_path in ftp.nlst():
 
             # Write to file
-            local_filename = 'webserver/tmp/image2.jpg'
-            file = open(local_filename, 'wb')
+            file = open('webserver/tmp/image2.jpg', 'wb')
             ftp.retrbinary('RETR '+ image_path, file.write)
             file.close()
 
@@ -39,6 +43,11 @@ while True:
 
             # Delete directory
             ftp.rmd(parent +'/'+ directory) 
+
+            # Publish data
+            final_image = cv2.imread('webserver/tmp/image2.jpg')
+            data = cv2.imencode('.jpg', final_image)[1].tobytes()
+            client.publish("demo2_image", data)
 
     # Quit ftp
     ftp.quit()  
