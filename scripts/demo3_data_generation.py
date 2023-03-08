@@ -1,13 +1,9 @@
 # Imports
-import os
 import cv2
 import glob
-import pickle
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from preprocessing import *
+from vision_demonstrator.preprocessing import *
 
 # Create empty dataset
 df = pd.DataFrame({'R': pd.Series(dtype='int'),
@@ -16,7 +12,7 @@ df = pd.DataFrame({'R': pd.Series(dtype='int'),
                    'Class': pd.Series(dtype='str')})
 
 # Loop over every image
-for i in glob.glob('demo3_resistors/data/images/*jpg'):
+for i in glob.glob('data/images/*jpg'):
     
     # Read image
     image = cv2.imread(i)
@@ -52,6 +48,6 @@ for i in glob.glob('demo3_resistors/data/images/*jpg'):
         df = pd.concat([df, df_tmp])
 
 # Save data
-df.to_csv('demo3_resistors/data/color_data.csv', index=False)
+df.to_csv('data/color_data.csv', index=False)
 
 

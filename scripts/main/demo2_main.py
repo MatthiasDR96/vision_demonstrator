@@ -1,15 +1,8 @@
 # Imports
-import os
 import cv2
 import time
-import numpy
-import config
+import matplotlib.pyplot as plt
 from ftplib import FTP
-import pyrealsense2 as realsense
-
-# File name
-filematch = '*.jpg'
-target_dir = "images"
 
 # Loop
 while True:
@@ -28,23 +21,29 @@ while True:
 
     # Loop over the directories
     for directory in directories:
+
+        # Go to image folder
         ftp.cwd(parent +'/'+ directory)
-        for image in ftp.nlst():
-            local_filename = os.path.join('images', image)
+
+        # Loop over images
+        for image_path in ftp.nlst():
+
+            # Write to file
+            local_filename = 'webserver/tmp/image2.jpg'
             file = open(local_filename, 'wb')
-            ftp.retrbinary('RETR '+ image, file.write)
+            ftp.retrbinary('RETR '+ image_path, file.write)
             file.close()
-            ftp.delete(image)
-        try:
-            ftp.rmd(parent +'/'+ directory)
-        except:
-            pass
 
-    # Quit file transfer
-    ftp.quit() 
+            # Delete frame
+            ftp.delete(image_path)
 
-    # Write as image
-    cv2.imwrite('webserver/tmp/image2.jpg', file)
+            # Delete directory
+            ftp.rmd(parent +'/'+ directory) 
+
+    # Quit ftp
+    ftp.quit()  
+
+    ### End of loop
 
     # Print
     print("Demo 2 - sawblade - running")

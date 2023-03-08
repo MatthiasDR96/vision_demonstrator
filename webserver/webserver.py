@@ -2,6 +2,9 @@
 import cv2
 import time
 from flask import Flask, Response, render_template
+from vision_demonstrator.demo1_main import demo1
+from vision_demonstrator.demo2_main import demo2
+from vision_demonstrator.demo3_main import demo3
 
 # Create app
 app = Flask(__name__)
@@ -10,12 +13,26 @@ app = Flask(__name__)
 screen_size = (1920, 1080)
 delay = 0.03
 
+#demo1 = demo1()
+#demo1 = demo2()
+#demo1 = demo3()
+
 # Generate frames
 def gen(stream_id):
 
     # Loop
-     while True:
-                
+    while True:
+
+        #if int(stream_id) == 1:
+            #frame = demo1.read()
+            #print(frame)
+        #elif int(stream_id) == 1:
+            #frame = demo2.read()
+            #print(frame)
+        #elif int(stream_id) == 1:
+            #frame = demo3.read()
+            #print(frame)
+
         # GEt file name
         file = 'webserver/tmp/image' + str(stream_id) + '.jpg'
 
@@ -25,7 +42,7 @@ def gen(stream_id):
         if check_chars != b'\xff\xd9':
             frame = None
         else:
-            frame = cv2.imread(file)
+           frame = cv2.imread(file)
 
         # Check if there is a frame
         if frame is None: continue

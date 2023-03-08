@@ -1,31 +1,34 @@
 # Imports
-import os
 import cv2
+import yaml
 import numpy
-from demo1_ball_position.Camera import Camera
-from demo1_ball_position.Viewer import Viewer
+from vision_demonstrator.Camera2 import Camera
+
+# Load params
+with open("config/demo1_config.yaml", 'r') as stream:
+    config = yaml.safe_load(stream)
+
+# Create camera object
+cam = Camera(config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
 # Read data from previous calibrations
-hsvfile = numpy.load('demo1_ball_position/data/hsv.npy')
-
-# Get camera object
-cam = Camera()
-cam.start()
-
-# Get Viewer object
-viewer = Viewer()
+hsvfile = numpy.load('data/hsv.npy')
 
 def nothing(*args):
     pass
 
+# Make window
+cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('Calibration', 1902, 1280)
+
 # Make sliders
-cv2.createTrackbar('Hmin', viewer.window_name, hsvfile[0], 179, nothing)
-cv2.createTrackbar('Hmax', viewer.window_name, hsvfile[1], 179, nothing)
-cv2.createTrackbar('Smin', viewer.window_name, hsvfile[2], 255, nothing)
-cv2.createTrackbar('Smax', viewer.window_name, hsvfile[3], 255, nothing)
-cv2.createTrackbar('Vmin', viewer.window_name, hsvfile[4], 255, nothing)
-cv2.createTrackbar('Vmax', viewer.window_name, hsvfile[5], 255, nothing)
-cv2.createTrackbar('save', viewer.window_name, 0, 1, nothing)
+cv2.createTrackbar('Hmin', 'Calibration', hsvfile[0], 179, nothing)
+cv2.createTrackbar('Hmax', 'Calibration', hsvfile[1], 179, nothing)
+cv2.createTrackbar('Smin', 'Calibration', hsvfile[2], 255, nothing)
+cv2.createTrackbar('Smax', 'Calibration', hsvfile[3], 255, nothing)
+cv2.createTrackbar('Vmin', 'Calibration', hsvfile[4], 255, nothing)
+cv2.createTrackbar('Vmax', 'Calibration', hsvfile[5], 255, nothing)
+cv2.createTrackbar('save', 'Calibration', 0, 1, nothing)
 
 # Define image formats
 HSVmin = numpy.zeros((cam.color_resolution[1], cam.color_resolution[0], 3), numpy.uint8)
@@ -40,13 +43,13 @@ white_image[:] = [255, 255, 255]
 while True:
 
     # Get slider values
-    hmin = cv2.getTrackbarPos('Hmin', viewer.window_name)
-    hmax = cv2.getTrackbarPos('Hmax', viewer.window_name)
-    smin = cv2.getTrackbarPos('Smin', viewer.window_name)
-    smax = cv2.getTrackbarPos('Smax', viewer.window_name)
-    vmin = cv2.getTrackbarPos('Vmin', viewer.window_name)
-    vmax = cv2.getTrackbarPos('Vmax', viewer.window_name)
-    save = cv2.getTrackbarPos('save', viewer.window_name)
+    hmin = cv2.getTrackbarPos('Hmin', 'Calibration')
+    hmax = cv2.getTrackbarPos('Hmax', 'Calibration')
+    smin = cv2.getTrackbarPos('Smin', 'Calibration')
+    smax = cv2.getTrackbarPos('Smax', 'Calibration')
+    vmin = cv2.getTrackbarPos('Vmin', 'Calibration')
+    vmax = cv2.getTrackbarPos('Vmax', 'Calibration')
+    save = cv2.getTrackbarPos('save', 'Calibration')
 
     # Read images
     color_image, depth_image = cam.read()
@@ -79,12 +82,15 @@ while True:
     # Mount all images
     img = numpy.hstack((color_image, mask_bgr, res))
 
-    # Show images
-    viewer.show_image(img)
+    # Show image
+    cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('Calibration', 1920, 1080)
+    cv2.imshow('Calibration', img)
+    cv2.waitKey(1)
 
     # Leave loop on save button
     if (save): break
 
 # Save data
 hsvarray = numpy.array([hmin, hmax, smin, smax, vmin, vmax])
-numpy.save('demo1_ball_position/data/hsv.npy', hsvarray)
+numpy.save('data/hsv.npy', hsvarray)

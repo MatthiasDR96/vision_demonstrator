@@ -1,14 +1,13 @@
 # Imports
-import os
 import cv2
 import glob
 import pickle
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from decode import decode
 from sklearn.preprocessing import LabelEncoder 
-from preprocessing import *
+from vision_demonstrator.decode import *
+from  vision_demonstrator.preprocessing import *
 
 # Load data
 df = pd.read_csv("demo3_resistors/data/color_data.csv")

@@ -1,26 +1,21 @@
 # Imports
 import cv2
 import time
-import config
+import yaml
 import numpy as np
-from Camera import Camera
-from Viewer import *
+from vision_demonstrator.Viewer import *
+from vision_demonstrator.Camera import Camera
+from vision_demonstrator.camera_callibration import *
 
-# Create camera object and start camera
-cam = Camera()
-cam.start()
+# Load params
+with open("config/demo1_config.yaml", 'r') as stream:
+    config = yaml.safe_load(stream)
 
-# Create viewer object and set window
-window_name = config.window_name
-window_height = config.window_height
-window_width = config.window_width
+# Create camera object
+cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
 # Get HSV calibration params 
-hsvfile = np.load('demo1_ball_position/data/hsv.npy')
-
-# Get HSV calibration params
-lower_color = np.array([hsvfile[0], hsvfile[2], hsvfile[4]])
-upper_color = np.array([hsvfile[1], hsvfile[3], hsvfile[5]])
+hsvfile = np.load('data/hsv.npy')
 
 # Loop
 while True:
@@ -35,19 +30,19 @@ while True:
     final_image = color_image.copy()
 
     # Gaussian blur
-    #blurred_image = cv2.GaussianBlur(color_image, (7, 7), 0)
+    blurred_image = cv2.GaussianBlur(color_image, (7, 7), 0)
 
     # Convert to hsv color space
     hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
     # Get mask
-    mask = cv2.inRange(hsv, lower_color, upper_color)
+    mask = cv2.inRange(hsv, np.array([hsvfile[0], hsvfile[2], hsvfile[4]]), np.array([hsvfile[1], hsvfile[3], hsvfile[5]]))
 
     # Erode to close gaps
-    #mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.erode(mask, None, iterations=2)
 
     # Dilate to get original size
-    #mask = cv2.dilate(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
 
     # Find contours
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -69,13 +64,13 @@ while True:
         ((x, y), radius) = cv2.minEnclosingCircle(maxcontour)
 
         # If radius is big enough, it is the ball
-        if radius >= config.ball_radius:
+        if radius >= config['ball_radius']:
                 
             # Get pixel depth
             depth_pixel = depth_image[center[1], center[0]]
 
             # Transform 2D to 3D camera coordinates
-            xcam, ycam, zcam = cam.intrinsic_trans(center, depth_pixel, cam.mtx)
+            xcam, ycam, zcam = intrinsic_trans(center, depth_pixel, cam.mtx)
 
             # Plot ball pixel
             cv2.circle(final_image, center, 5, (0, 0, 255), -1)
@@ -83,17 +78,17 @@ while True:
             center_as_string = ''.join(str(center))
         
     # Exctrinsic calibration
-    ret, corners, rvecs, tvecs, ext = cam.extrinsic_calibration(color_image)
+    ret, corners, rvecs, tvecs, ext = extrinsic_calibration(color_image, cam.mtx, cam.dist)
 
     # Draw chessboard
     if ret:
 
         # Transform camera coordinates to world coordinates
-        yworld, xworld, zworld = cam.extrinsic_trans(depth_pixel, xcam, ycam, zcam, ext)
+        yworld, xworld, zworld = extrinsic_trans(depth_pixel, xcam, ycam, zcam, ext)
 
         # Plot chessboard
-        final_image = cv2.drawChessboardCorners(final_image, (cam.b, cam.h), corners, ret)
-        final_image = draw_axes(final_image, cam.mtx, cam.dist, rvecs, tvecs, 3*config.chessboard_size)
+        final_image = cv2.drawChessboardCorners(final_image, (9, 14), corners, ret)
+        final_image = draw_axes(final_image, cam.mtx, cam.dist, rvecs, tvecs, 3*config['chessboard_size'])
 
     # Rotate image
     final_image = cv2.rotate(final_image, cv2.ROTATE_180)
@@ -101,6 +96,8 @@ while True:
     # Show ball and coordinates
     if ret and depth_pixel:
         final_image = draw_ball_pixel(final_image, xworld, yworld, zworld, radius/3.3333)
+
+    ### End of loop
 
     # Write as image
     cv2.imwrite('webserver/tmp/image1.jpg', final_image)

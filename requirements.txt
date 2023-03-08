@@ -1,0 +1,8 @@
+yaml
+numpy
+scipy
+pypylon
+matplotlib
+scikit-learn
+pyrealsense2
+opencv-python
