@@ -54,11 +54,15 @@ while True:
 
     ### End of loop
 
-    # Print
-    print("Demo 2 - sawblade - running")
-
     # Get end time
     t2 = time.time()
 
     # Sleep
     if (t2-t1) < 0.5: time.sleep(0.5 - (t2-t1))
+
+    # Get end time
+    t3 = time.time()
+
+    # Print
+    print("Demo 2 - sawblade - running at cycle time of " + str(t3-t1) + " seconds")
+

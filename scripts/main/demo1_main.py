@@ -104,17 +104,20 @@ while True:
     ### End of loop
 
     # Write as image
-    cv2.imwrite('webserver/tmp/image1.jpg', final_image)
+    # cv2.imwrite('webserver/tmp/image1.jpg', final_image)
 
     # Publish data
     data = cv2.imencode('.jpg', final_image)[1].tobytes()
     client.publish("demo1_image", data)
-
-    # Print
-    print("Demo 1 - 3D ball detection - running")
 
     # Get end time
     t2 = time.time()
 
     # Sleep
     if (t2-t1) < 0.5: time.sleep(0.5 - (t2-t1))
+
+    # Get end time
+    t3 = time.time()
+
+    # Print
+    print("Demo 1 - 3D ball detection - running at cycle time of " + str(t3-t1) + " seconds")

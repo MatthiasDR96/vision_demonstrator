@@ -27,19 +27,22 @@ while True:
     ### End of loop
 
     # Write as image
-    cv2.imwrite('webserver/tmp/image4.jpg', color_image)
+    # cv2.imwrite('webserver/tmp/image4.jpg', color_image)
 
     # Publish data
     data = cv2.imencode('.jpg', color_image)[1].tobytes()
     client.publish("demo4_image", data)
-
-    # Print
-    print("Demo 4 - classification - running")
 
     # Get end time
     t2 = time.time()
 
     # Sleep
     if (t2-t1) < 0.5: time.sleep(0.5 - (t2-t1))
+
+    # Get end time
+    t3 = time.time()
+
+    # Print
+    print("Demo 4 - classification - running at cycle time of " + str(t3-t1) + " seconds")
 
 
