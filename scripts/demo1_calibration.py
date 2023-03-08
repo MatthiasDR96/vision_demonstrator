@@ -2,14 +2,14 @@
 import cv2
 import yaml
 import numpy
-from vision_demonstrator.Camera2 import Camera
+from vision_demonstrator.Camera import Camera
 
 # Load params
 with open("config/demo1_config.yaml", 'r') as stream:
     config = yaml.safe_load(stream)
 
 # Create camera object
-cam = Camera(config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
+cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
 # Read data from previous calibrations
 hsvfile = numpy.load('data/hsv.npy')
@@ -31,10 +31,10 @@ cv2.createTrackbar('Vmax', 'Calibration', hsvfile[5], 255, nothing)
 cv2.createTrackbar('save', 'Calibration', 0, 1, nothing)
 
 # Define image formats
-HSVmin = numpy.zeros((cam.color_resolution[1], cam.color_resolution[0], 3), numpy.uint8)
-HSVmax = numpy.zeros((cam.color_resolution[1], cam.color_resolution[0], 3), numpy.uint8)
-HSVgem = numpy.zeros((cam.color_resolution[1], cam.color_resolution[0], 3), numpy.uint8)
-white_image = numpy.zeros((cam.color_resolution[1], cam.color_resolution[0], 3), numpy.uint8)
+HSVmin = numpy.zeros((config['color_resolution'][1], config['color_resolution'][0], 3), numpy.uint8)
+HSVmax = numpy.zeros((config['color_resolution'][1], config['color_resolution'][0], 3), numpy.uint8)
+HSVgem = numpy.zeros((config['color_resolution'][1], config['color_resolution'][0], 3), numpy.uint8)
+white_image = numpy.zeros((config['color_resolution'][1], config['color_resolution'][0], 3), numpy.uint8)
 
 # Initial mask
 white_image[:] = [255, 255, 255]

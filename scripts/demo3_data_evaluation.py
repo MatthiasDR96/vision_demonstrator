@@ -10,18 +10,18 @@ from vision_demonstrator.decode import *
 from  vision_demonstrator.preprocessing import *
 
 # Load data
-df = pd.read_csv("demo3_resistors/data/color_data.csv")
+df = pd.read_csv("data/color_data.csv")
 
 # Encode categorical labels
 labelencoder = LabelEncoder() 
 df['Class'] = labelencoder.fit_transform(df['Class'])
 
 # Load model
-filename = 'demo3_resistors/data/model.sav'
+filename = 'data/model.sav'
 model = pickle.load(open(filename, 'rb'))
 
 # Loop over every image
-for i in glob.glob('demo3_resistors/data/images/*jpg'):
+for i in glob.glob('data/images/*jpg'):
 
     # Read image
     image = cv2.imread(i)

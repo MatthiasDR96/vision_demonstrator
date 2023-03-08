@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn import svm
 
 # Load data
-df = pd.read_csv("demo3_resistors/data/color_data.csv")
+df = pd.read_csv("data/color_data.csv")
 
 # Encode categorical labels
 labelencoder= LabelEncoder() 
@@ -18,5 +18,5 @@ clf = svm.SVC()
 clf.fit(df[['R', 'G', 'B']].values, df['Class'].values)
 
 # Save model
-filename = 'demo3_resistors/data/model.sav'
+filename = 'data/model.sav'
 pickle.dump(clf, open(filename, 'wb'))

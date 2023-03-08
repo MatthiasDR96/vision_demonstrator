@@ -2,7 +2,7 @@
 import os
 import cv2
 import yaml
-from vision_demonstrator.Camera2 import Camera
+from vision_demonstrator.Camera import Camera
 
 # SET THE NUMBER OF SAMPLES PER CLASS
 number_of_samples_per_class = 100
@@ -24,8 +24,7 @@ with open("config/demo4_config.yaml", 'r') as stream:
     config = yaml.safe_load(stream)
 
 # Create camera object
-cam = Camera(config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
-print(cam)
+cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
 # Data generation loop
 counter = 1

@@ -24,30 +24,36 @@ while True:
     # Get filenames within the directory
     directories = ftp.nlst()
 
-    # Loop over the directories
-    for directory in directories:
+    # Check if there is a directory
+    if len(directories) == 0: continue
 
-        # Go to image folder
-        ftp.cwd(parent +'/'+ directory)
+    # Go to most recent image folder
+    ftp.cwd(parent +'/'+ directories[0])
 
-        # Loop over images
-        for image_path in ftp.nlst():
+    # Get images in folder
+    image_paths = ftp.nlst()
 
-            # Write to file
-            file = open('webserver/tmp/image2.jpg', 'wb')
-            ftp.retrbinary('RETR '+ image_path, file.write)
-            file.close()
+    # Check if there is an image
+    if len(image_paths) == 0: continue
 
-            # Delete frame
-            ftp.delete(image_path)
+    # Select required image
+    image_path = image_paths[0]
 
-            # Delete directory
-            ftp.rmd(parent +'/'+ directory) 
+    # Write to file
+    file = open('webserver/tmp/image2.jpg', 'wb')
+    ftp.retrbinary('RETR '+ image_path, file.write)
+    file.close()
 
-            # Publish data
-            final_image = cv2.imread('webserver/tmp/image2.jpg')
-            data = cv2.imencode('.jpg', final_image)[1].tobytes()
-            client.publish("demo2_image", data)
+    # Delete frame
+    ftp.delete(image_path)
+
+    # Delete directory
+    ftp.rmd(parent +'/'+ directories[0]) 
+
+    # Publish data
+    final_image = cv2.imread('webserver/tmp/image2.jpg')
+    data = cv2.imencode('.jpg', final_image)[1].tobytes()
+    client.publish("demo2_image", data)
 
     # Quit ftp
     ftp.quit()  
