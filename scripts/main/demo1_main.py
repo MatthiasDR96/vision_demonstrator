@@ -4,7 +4,7 @@ import time
 import yaml
 import numpy as np
 import paho.mqtt.client as mqtt
-from vision_demonstrator.Viewer import *
+from vision_demonstrator.viewer import *
 from vision_demonstrator.Camera import Camera
 from vision_demonstrator.camera_callibration import *
 
