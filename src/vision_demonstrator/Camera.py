@@ -121,13 +121,22 @@ class CameraBasler:
 		self.camera.StopGrabbing()
 
 	def read(self):
-		grab = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
-		if grab.GrabSucceeded():
-			image = self.converter.Convert(grab)
-			image = image.GetArray()  
-		else:
-			image = None   
-		grab.Release()
+		
+		while True:
+			try:
+				grab = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+			except:
+				continue
+			if grab.GrabSucceeded():
+				image = self.converter.Convert(grab)
+				image = image.GetArray()  
+				break
+			else:
+				image = None   
+			grab.Release()
+		
 		return image, image
+			
+
 
 	

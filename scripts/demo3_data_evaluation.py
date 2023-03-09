@@ -21,23 +21,22 @@ filename = 'data/model.sav'
 model = pickle.load(open(filename, 'rb'))
 
 # Loop over every image
-for i in glob.glob('data/images/*jpg'):
+for i in glob.glob('data/resistor_images/*jpg'):
 
     # Read image
     image = cv2.imread(i)
 
     # Read label
-    label = i.split('/')[-1].split('_')[1][0:-4]
+    label = i.split('_')[-1][0:3]
 
     # Extract resistor
-    cropped = extract_resistor(image)
+    ret, cropped = extract_resistor(image)
 
     # Extract color bands
-    color_bands = extract_color_bands(cropped)
+    ret, color_bands = extract_color_bands(cropped)
 
     # Stop if the result is wrong
-    if color_bands is None:
-        continue
+    if color_bands is None: continue
 
     # Iterate over first three contours
     prediction = ''
@@ -58,10 +57,11 @@ for i in glob.glob('data/images/*jpg'):
         prediction += pred
 
     # Print result
+    print(prediction)
     print(decode(label) + ' - ' + decode(prediction))
 
     # Plot
-    cv2.putText(img=image, text=decode(prediction), org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
+    cv2.putText(img=image, text=prediction + " - " + decode(prediction), org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
     plt.imshow(image)
     plt.show()
 

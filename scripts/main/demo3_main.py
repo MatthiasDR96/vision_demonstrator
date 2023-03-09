@@ -72,12 +72,17 @@ while True:
                 # Continue if data has no Nan values
                 if not np.isnan(new_data).any():
                 
-                    # Predict
-                    pred = model.predict([[np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]])
+                    try:
 
-                    # Convert to class
-                    pred = labelencoder.inverse_transform(pred)[0]
-                    prediction += pred
+                        # Predict
+                        pred = model.predict([[np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]])
+    
+                        # Convert to class
+                        pred = labelencoder.inverse_transform(pred)[0]
+                        prediction += pred
+
+                    except:
+                        pass
 
             # Draw text
             if len(prediction) == 3:

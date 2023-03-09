@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
 	# Config camera
 	config = rs.config()
-	config.enable_device('821212060746') #'821312060313'
+	config.enable_device('821312060307')
 	config.enable_stream(rs.stream.depth, depth_resolution[0], depth_resolution[1], rs.format.z16, frames_per_second)
 	config.enable_stream(rs.stream.color, color_resolution[0], color_resolution[1], rs.format.bgr8, frames_per_second)
 	
@@ -132,8 +132,5 @@ if __name__ == '__main__':
 		class_list = [cname.strip() for cname in f.readlines()]
 		
 	# Loop
-	#try:
 	main()
-	#except:
-		#pipeline.stop()
-		#cv2.destroyAllWindows()
+	

@@ -3,7 +3,6 @@ import cv2
 import time
 from ftplib import FTP
 import paho.mqtt.client as mqtt
-import matplotlib.pyplot as plt
 
 # Init MQTT server
 client = mqtt.Client()

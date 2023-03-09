@@ -1,7 +1,7 @@
 def decode(bands):
 
     # Init
-    color = ['k', 'z', 'r', 'o', 'y','g', 'b', 'v', 'x', 'w']
+    color = ['k', 'z', 'r', 'o', 'y','g', 'b', 'v', 'x', 'w'] # [black, brown, red, orange, yellow, green, blue, violet, gray, white]
     value = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     ohm, multiplier, unit = '', '', ' ohms'
 
