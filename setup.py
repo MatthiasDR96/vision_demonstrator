@@ -9,8 +9,8 @@ setup(
     author_email='matthias.deryck@kuleuven.be',
     description='Software for the vision demonstrator of KU Leuven Bruges',
     packages=['vision_demonstrator'],
-    package_data={'vision_demonstrator': ['data/*.npy', 'data/*.nav', 'data/*.scv', 'config/*.yaml']},
+    package_data={'vision_demonstrator': ['data/*.npy', 'data/*.nav', 'data/*.scv', 'data/*.txt', 'data/*.onnx', 'data/*.pt', 'config/*.yaml']},
     package_dir={'': 'src'},
-    scripts=['scripts/main/demo1_main.py', 'scripts/main/demo2_main.py', 'scripts/main/demo3_main.py', 'scripts/main/demo4_main.py'],
+    scripts=['scripts/main/demo1_main.py', 'scripts/main/demo2_main.py', 'scripts/main/demo3_main.py', 'scripts/main/demo4_main.py', 'scripts/main/demo5_main.py'],
     install_requires=['paho-mqtt', 'pyrealsense2', 'opencv-python', 'numpy', 'matplotlib', 'pandas']
 )
