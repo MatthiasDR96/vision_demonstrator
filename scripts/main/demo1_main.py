@@ -119,7 +119,7 @@ while True:
 	t2 = time.time()
 
 	# Sleep
-	if (t2-t1) < 0.5: time.sleep(0.5 - (t2-t1))
+	if (t2-t1) < 0.2: time.sleep(0.2 - (t2-t1))
 
 	# Get end time
 	t3 = time.time()

@@ -13,11 +13,12 @@ depth_resolution = (1280, 720)
 frames_per_second = 30
 camera_id = '821312060313'  # To be found in Realsense Viewer
 
-root = "raw_data2"
+# Root folder
+root = "data/defect_images"
 
 # Folders
 path_class_nut = f"{root}/nut"
-path_class_large_scratch = f"{root}/large_scratch"
+path_class_large_scratch = f"{root}/scratch"
 path_class_ok = f"{root}/no_defect"
 
 # Create folders
@@ -57,13 +58,13 @@ for i in os.listdir(f"{root}/"):  # For all classes
         counter = os.listdir(f"{root}/" + i).__len__()
         print(f"Currently {counter} images in this class")
     while True:  # Until ESC is pressed
+
         # Define path
         path = f"{root}/{i}/sample_" + str(counter+1) + ".jpg"
 
         # Wait for image
         frames = conn.wait_for_frames()
 
-        # Align images
         # Align images
         aligned_frames = align.process(frames)
 
