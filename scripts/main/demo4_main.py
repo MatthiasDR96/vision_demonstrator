@@ -47,41 +47,44 @@ transform = transforms.ToTensor()
 
 # Loop
 with torch.no_grad():
-    while True:
+	while True:
 
-        # Get start time
-        t1 = time.time()
+		# Get start time
+		t1 = time.time()
 
-        # Read frame
-        color_image, depth_image = cam.read()
+		# Read frame
+		color_image, depth_image = cam.read()
 
-        # Transform data
-        tensor = transform(color_image)
-        tensor = tensor.unsqueeze(0)
+		# Transform data
+		tensor = transform(color_image)
+		tensor = tensor.unsqueeze(0)
 
-        # Predict class
-        output = model(tensor)
+		# Predict class
+		output = model(tensor)
 
-        # Print output
-        #color_image = cv2.rotate(color_image, cv2.ROTATE_90_CLOCKWISE)
-        cv2.putText(color_image, classes[output.argmax()], [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
-        
-        ### End of loop
+		# Print output
+		#color_image = cv2.rotate(color_image, cv2.ROTATE_90_CLOCKWISE)
+		cv2.putText(color_image, classes[output.argmax()], [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
+		
+		### End of loop
 
-        # Publish data
-        data = cv2.imencode('.jpg', color_image)[1].tobytes()
-        client.publish("demo4_image", data)
+		# Resize image
+		final_image = cv2.resize(color_image, (1080, 1920)) 
 
-        # Get end time
-        t2 = time.time()
+		# Publish data
+		data = cv2.imencode('.jpg', final_image)[1].tobytes()
+		client.publish("demo4_image", data)
 
-        # Sleep
-        if (t2-t1) < rate: time.sleep(rate - (t2-t1))
+		# Get end time
+		t2 = time.time()
 
-        # Get end time
-        t3 = time.time()
+		# Sleep
+		if (t2-t1) < rate: time.sleep(rate - (t2-t1))
 
-        # Print
-        print("Demo 4 - classification - running at cycle time of " + str(t3-t1) + " seconds")
+		# Get end time
+		t3 = time.time()
+
+		# Print
+		print("Demo 4 - classification - running at cycle time of " + str(t3-t1) + " seconds")
 
 

@@ -106,13 +106,8 @@ while True:
 
 	### End of loop
 
-	# Write as image
-	# cv2.imwrite('webserver/tmp/image1.jpg', final_image)
-
-	# Show
-	#cv2.imshow("People detection", final_image)
-	#if cv2.waitKey(1) > -1:
-		#break
+	# Resize image
+	final_image = cv2.resize(final_image, (1080, 1920)) 
 
 	# Publish data
 	data = cv2.imencode('.jpg', final_image)[1].tobytes()

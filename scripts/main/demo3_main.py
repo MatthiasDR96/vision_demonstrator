@@ -34,53 +34,56 @@ model = pickle.load(open(filename, 'rb'))
 # Loop
 while True:
 
-    # Get start time
-    t1 = time.time()
+	# Get start time
+	t1 = time.time()
 
-    # Get frame
-    image, _ = cam.read()
+	# Get frame
+	image, _ = cam.read()
 
-    # Extract resistor bounding box
-    ret, rect, debug1 = extract_resistor(image)
+	# Extract resistor bounding box
+	ret, rect, debug1 = extract_resistor(image)
 
-    # Extract cropped bands
-    ret, crop, debug2 = align_resistor(image, rect)
+	# Extract cropped bands
+	ret, crop, debug2 = align_resistor(image, rect)
 
-    # Extract color band contours
-    ret, bands, debug3 = extract_color_bands(debug1, crop)
+	# Extract color band contours
+	ret, bands, debug3 = extract_color_bands(debug1, crop)
 
-    # Iterate over first three contours
-    prediction = ''
-    for band in bands:
+	# Iterate over first three contours
+	prediction = ''
+	for band in bands:
 
-        # Predict
-        pred = model.predict([band])
+		# Predict
+		pred = model.predict([band])
 
-        # Convert to class
-        prediction += labelencoder.inverse_transform(pred)[0]
+		# Convert to class
+		prediction += labelencoder.inverse_transform(pred)[0]
 
-    # Draw text
-    if len(prediction) == 3: cv2.putText(debug3, text=prediction + " - " + decode(prediction), org=(550, 100), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
+	# Draw text
+	if len(prediction) == 3: cv2.putText(debug3, text=prediction + " - " + decode(prediction), org=(550, 100), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
 
-    # Display the resulting frame
-    cv2.imshow('frame', debug3)
-    if cv2.waitKey(10) & 0xFF == ord('q'):
-        break
+	# Display the resulting frame
+	#cv2.imshow('frame', debug3)
+	#if cv2.waitKey(10) & 0xFF == ord('q'):
+		#break
 
-    ### End of loop
-    
-    # Publish data
-    data = cv2.imencode('.jpg', debug3)[1].tobytes()
-    client.publish("demo3_image", data)
+	### End of loop
 
-    # Get end time
-    t2 = time.time()
+	# Resize image
+	final_frame = cv2.resize(debug3, (1080, 1920))  
 
-    # Sleep
-    if (t2-t1) < rate: time.sleep(rate - (t2-t1))
+	# Publish data
+	data = cv2.imencode('.jpg', final_frame)[1].tobytes()
+	client.publish("demo3_image", data)
 
-    # Get end time
-    t3 = time.time()
+	# Get end time
+	t2 = time.time()
 
-    # Print
-    print("Demo 3 - resistors - running at cycle time of " + str(t3-t1) + " seconds")
+	# Sleep
+	if (t2-t1) < rate: time.sleep(rate - (t2-t1))
+
+	# Get end time
+	t3 = time.time()
+
+	# Print
+	print("Demo 3 - resistors - running at cycle time of " + str(t3-t1) + " seconds")
