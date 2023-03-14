@@ -5,10 +5,7 @@ import matplotlib.pyplot as plt
 
 def extract_resistor(image):
 
-	# Convert to RGB
-	image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-	# Convert to gray, and threshold
+	# Convert to gray to threshold background
 	image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 	# Threshold background
@@ -17,27 +14,48 @@ def extract_resistor(image):
 	# Morphological transformations to remove sticks
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20,20))
 	morphed_open = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel)
-	morphed_close = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
+	image_thresh = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
 
 	# Find contour of resistor
-	contours = cv2.findContours(morphed_close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+	contours = cv2.findContours(image_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
 	# Check if there are contours
-	if len(contours) == 0: return False, None
+	if len(contours) == 0: return False, None, debug_image
 
 	# Get largest contour
 	maxcontour = max(contours, key=cv2.contourArea)
 
+	# Check if contours are too big or too small
+	if cv2.contourArea(maxcontour) > 60000 or cv2.contourArea(maxcontour) < 30000: return False, None, debug_image
+
 	# Get minimal area rectangle
 	rect = cv2.minAreaRect(maxcontour)
+
+	# Draw rect
+	box = np.int0(cv2.boxPoints(rect))
+	debug_image = cv2.drawContours(image.copy(),[box], 0, (0,0,255), 2)
+
+	return True, rect, debug_image
+
+def align_resistor(image, rect):
+
+	# Check if input is okay
+	if rect is None: return False, None, image
 
 	# Get rectangle properties
 	angle = rect[2]
 	rows, cols = image.shape[0], image.shape[1]
 
+	# Make sure alignment is horizontaly
+	#print(float(rect[1][0])/rect[1][1])
+	#if float(rect[1][0])/rect[1][1] < 1:
+		#rotation = angle + 90
+	#else:
+		#rotation = 90 -(angle - 90)
+
 	# Rotate image
 	M = cv2.getRotationMatrix2D((rect[0][0],rect[0][1]), angle-90, 1)
-	img_rot = cv2.warpAffine(image,M,(cols,rows))
+	image_aligned = cv2.warpAffine(image,M,(cols,rows))
 
 	# Rotate bounding box 
 	box = cv2.boxPoints((rect[0], rect[1], angle))
@@ -45,42 +63,83 @@ def extract_resistor(image):
 	pts[pts < 0] = 0
 
 	# Cropping
-	cropped = img_rot[pts[0][1]+20:pts[3][1]-100, pts[0][0]+40:pts[2][0]-140]
-
-	# Check if cropped image has some rows
-	if cropped.shape[1] == 0: return False, None
+	image_cropped = image_aligned[pts[0][1]:pts[3][1], pts[0][0]:pts[2][0]]
+	
+	# Check if cropped image has some rows and columns
+	if image_cropped.shape[1] == 0 or image_cropped.shape[0] == 0: return False, None, image_aligned
 
 	# Bilateral filtering
-	cropped = cv2.bilateralFilter(cropped, 15, 35, 35)
+	#image_cropped = cv2.bilateralFilter(image_cropped, 15, 35, 35)
+	
+	return True, image_cropped, image_aligned
 
-	return True, cropped
+def extract_color_bands(image, crop):
 
-def extract_color_bands(image):
+	# Check if input is okay
+	if crop is None: return False, [], crop
+
+	# Get HSV calibration params 
+	hsvfile = np.load('data/demo3_hsv.npy')
+
+	# Convert image to HSV
+	hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
 
 	# Remove area in between color bands
-	mask = cv2.bitwise_not(cv2.inRange(image, np.array([120, 120, 110]), np.array([190, 190, 180])))
+	mask = cv2.inRange(hsv, np.array([hsvfile[0], hsvfile[2], hsvfile[4]]), np.array([hsvfile[1], hsvfile[3], hsvfile[5]]))
 
+	# Morphological transformations to remove sticks
+	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+	morphed_open = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+	mask = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
+	
 	# Find the three largest contours of the color bands
 	contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-	# Get three largest contours
-	largest_contours = sorted(contours, key=cv2.contourArea)
-	largest_contours.reverse()
-	largest_contours = largest_contours[0:3]
+	# Plot
+	cv2.drawContours(crop, contours, -1, (255,0,0), 3)
+
+	# Debug image
+	debug_image = image.copy()
+	debug_image[0:crop.shape[0], 0:crop.shape[1]] = crop
+
+	# Remove contours outside ROI
+	remaining_contours = []
+	for cnt in contours:
+		if cv2.contourArea(cnt) < 50: continue
+		x,y,w,h = cv2.boundingRect(cnt)
+		if x < 250: remaining_contours.append(cnt)
 
 	# Plot
-	tmp = cv2.drawContours(image.copy(), largest_contours, -1, (0,255,0), 1)
+	cv2.drawContours(crop, remaining_contours, -1, (0,255,0), 3)
+
+	# Debug image
+	debug_image = image.copy()
+	debug_image[0:crop.shape[0], 0:crop.shape[1]] = crop
+
+	# Check if enough contours
+	if len(remaining_contours) < 3: return False, [], debug_image
+
+	# Get three largest contours
+	largest_contours = sorted(remaining_contours, key=cv2.contourArea, reverse=True)[0:3]
 
 	# Sort contours from left to right
-	sorted_contours = sorted(largest_contours, key=lambda ctr: cv2.boundingRect(ctr)[1])
-	sorted_contours.reverse()
+	sorted_contours = sorted(largest_contours, key=lambda ctr: cv2.boundingRect(ctr)[1], reverse=True)
 
-	# Make sure there are three bands
-	if len(sorted_contours) < 3:
-		return False, None
+	# Iterate over three contours
+	color_bands = []
+	for ctr in sorted_contours:
 
-	# Check if big enough
-	if cv2.contourArea(largest_contours[2]) < 50:
-		return False, None
+		# Get roi
+		x,y,w,h = cv2.boundingRect(ctr)
+		roi = crop[y:y+h, x+5:x+w-5]
 
-	return True, sorted_contours
+		# Make training data
+		new_data = np.reshape(roi, (roi.shape[0]*roi.shape[1], roi.shape[2]))
+
+		# Get means of RGB data
+		mean_rgb = [np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]
+
+		# Predict
+		color_bands.append(mean_rgb)
+
+	return True, color_bands, debug_image

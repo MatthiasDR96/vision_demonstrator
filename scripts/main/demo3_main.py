@@ -10,8 +10,8 @@ from vision_demonstrator.Camera import Camera
 from vision_demonstrator.preprocessing import *
 from sklearn.preprocessing import LabelEncoder 
 
-# Load params
-with open("config/demo3_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
+# Script rate
+rate = 0.2 # Seconds per loop
 
 # Create camera object
 cam = Camera('Basler', 0, 0, 0, 0)
@@ -40,68 +40,44 @@ while True:
     # Get frame
     image, _ = cam.read()
 
-    # Check frame
-    if image is None: continue
+    # Extract resistor bounding box
+    ret, rect, debug1 = extract_resistor(image)
 
-    # Convert to RGB
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # Extract cropped bands
+    ret, crop, debug2 = align_resistor(image, rect)
 
-    # Extract resistor
-    ret, cropped = extract_resistor(image)
+    # Extract color band contours
+    ret, bands, debug3 = extract_color_bands(debug1, crop)
 
-    # Check validity
-    if ret: 
+    # Iterate over first three contours
+    prediction = ''
+    for band in bands:
 
-        # Extract color bands
-        ret, color_bands = extract_color_bands(cropped)
+        # Predict
+        pred = model.predict([band])
 
-        # Stop if the result is wrong
-        if ret:
+        # Convert to class
+        prediction += labelencoder.inverse_transform(pred)[0]
 
-            # Iterate over first three contours
-            prediction = ''
-            for j, ctr in enumerate(color_bands):
+    # Draw text
+    if len(prediction) == 3: cv2.putText(debug3, text=prediction + " - " + decode(prediction), org=(550, 100), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
 
-                # Get roi
-                x,y,w,h = cv2.boundingRect(ctr)
-                roi = cropped[y:y+h, x+5:x+w-5]
-
-                # Make training data
-                new_data = np.reshape(roi, (roi.shape[0]*roi.shape[1], roi.shape[2]))
-
-                # Continue if data has no Nan values
-                if not np.isnan(new_data).any():
-                
-                    try:
-
-                        # Predict
-                        pred = model.predict([[np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]])
-    
-                        # Convert to class
-                        pred = labelencoder.inverse_transform(pred)[0]
-                        prediction += pred
-
-                    except:
-                        pass
-
-            # Draw text
-            if len(prediction) == 3:
-                cv2.putText(img=image, text=prediction + " - " + decode(prediction), org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
+    # Display the resulting frame
+    cv2.imshow('frame', debug3)
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+        break
 
     ### End of loop
-
-    # Write as image
-    # cv2.imwrite('webserver/tmp/image3.jpg', image)
     
     # Publish data
-    data = cv2.imencode('.jpg', image)[1].tobytes()
+    data = cv2.imencode('.jpg', debug3)[1].tobytes()
     client.publish("demo3_image", data)
 
     # Get end time
     t2 = time.time()
 
     # Sleep
-    if (t2-t1) < 0.2: time.sleep(0.2 - (t2-t1))
+    if (t2-t1) < rate: time.sleep(rate - (t2-t1))
 
     # Get end time
     t3 = time.time()

@@ -8,6 +8,9 @@ from vision_demonstrator.viewer import *
 from vision_demonstrator.Camera import Camera
 from vision_demonstrator.camera_callibration import *
 
+# Script rate
+rate = 0.2 # Seconds per loop
+
 # Load params
 with open("config/demo1_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
 
@@ -19,7 +22,7 @@ client = mqtt.Client()
 client.connect("mqtt.eclipseprojects.io")
 
 # Get HSV calibration params 
-hsvfile = np.load('data/hsv.npy')
+hsvfile = np.load('data/demo1_hsv.npy')
 
 # Loop
 while True:
@@ -119,7 +122,7 @@ while True:
 	t2 = time.time()
 
 	# Sleep
-	if (t2-t1) < 0.2: time.sleep(0.2 - (t2-t1))
+	if (t2-t1) < rate: time.sleep(rate - (t2-t1))
 
 	# Get end time
 	t3 = time.time()

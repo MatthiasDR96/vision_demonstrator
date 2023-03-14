@@ -10,6 +10,9 @@ import torchvision.transforms as transforms
 from vision_demonstrator.Camera import Camera
 from torchvision.models import ResNet34_Weights
 
+# Script rate
+rate = 0.2 # Seconds per loop
+
 # Load params
 with open("config/demo4_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
 
@@ -65,9 +68,6 @@ with torch.no_grad():
         
         ### End of loop
 
-        # Write as image
-        # cv2.imwrite('webserver/tmp/image4.jpg', color_image)
-
         # Publish data
         data = cv2.imencode('.jpg', color_image)[1].tobytes()
         client.publish("demo4_image", data)
@@ -76,7 +76,7 @@ with torch.no_grad():
         t2 = time.time()
 
         # Sleep
-        if (t2-t1) < 0.2: time.sleep(0.2 - (t2-t1))
+        if (t2-t1) < rate: time.sleep(rate - (t2-t1))
 
         # Get end time
         t3 = time.time()

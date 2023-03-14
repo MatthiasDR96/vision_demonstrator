@@ -9,10 +9,10 @@ with open("config/demo1_config.yaml", 'r') as stream:
     config = yaml.safe_load(stream)
 
 # Create camera object
-cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
+cam = Camera('Basler', 0, 0, 0, 0)
 
 # Read data from previous calibrations
-hsvfile = numpy.load('data/demo1_hsv.npy')
+hsvfile = numpy.load('data/demo3_hsv.npy')
 
 def nothing(*args):
     pass
@@ -93,4 +93,4 @@ while True:
 
 # Save data
 hsvarray = numpy.array([hmin, hmax, smin, smax, vmin, vmax])
-numpy.save('data/demo1_hsv.npy', hsvarray)
+numpy.save('data/demo3_hsv.npy', hsvarray)
