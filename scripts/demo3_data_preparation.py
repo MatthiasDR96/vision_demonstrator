@@ -6,48 +6,37 @@ import numpy as np
 from vision_demonstrator.preprocessing import *
 
 # Create empty dataset
-df = pd.DataFrame({'R': pd.Series(dtype='int'),
-                   'G': pd.Series(dtype='int'),
-                   'B': pd.Series(dtype='int'),
-                   'Class': pd.Series(dtype='str')})
+df = pd.DataFrame({'H': pd.Series(dtype='int'),
+				   'S': pd.Series(dtype='int'),
+				   'V': pd.Series(dtype='int'),
+				   'Class': pd.Series(dtype='str')})
 
 # Loop over every image
 for i in glob.glob('data/resistor_images/*jpg'):
-    
-    # Read image
-    image = cv2.imread(i)
+	
+	# Read image
+	image = cv2.imread(i)
 
-    # Read label
-    label = i.split('_')[-1][0:3]
+	# Read label
+	label = i.split('_')[-1][0:3]
 
-    # Extract resistor
-    ret, cropped = extract_resistor(image)
+	# Extract resistor bounding box
+	ret, rect, debug1 = extract_resistor(image)
 
-    # Extract color bands
-    ret, color_bands = extract_color_bands(cropped)
+	# Extract cropped bands
+	ret, crop, debug2 = align_resistor(image, rect)
 
-    if color_bands is None: continue
+	# Extract color band contours
+	ret, bands, debug3 = extract_color_bands(debug1, crop)
 
-    # Iterate over color bands
-    for j, ctr in enumerate(color_bands):
+	# Iterate over color bands
+	for j, band in enumerate(bands):
 
-        # Get roi
-        x,y,w,h = cv2.boundingRect(ctr)
-        roi = cropped[y:y+h, x+5:x+w-5]
+		# New entry
+		df2 = pd.DataFrame([[band[0], band[1], band[2], label[j]]], columns=['H','S','V', 'Class'])
 
-        # Make training data
-        new_data = np.reshape(roi, (roi.shape[0]*roi.shape[1], roi.shape[2]))
-        labels = np.reshape(np.repeat(label[j], roi.shape[0]*roi.shape[1]), (roi.shape[0]*roi.shape[1], 1))
-
-        # Make dataframe from sample
-        df_tmp = pd.DataFrame()
-        df_tmp['R'] = new_data[:, 0]
-        df_tmp['G'] = new_data[:, 1]
-        df_tmp['B'] = new_data[:, 2]
-        df_tmp['Class'] = labels
-
-        # Append to main dataframe
-        df = pd.concat([df, df_tmp])
+		# Append to main dataframe
+		df = pd.concat([df, df2])
 
 # Save data
 df.to_csv('data/color_data.csv', index=False)

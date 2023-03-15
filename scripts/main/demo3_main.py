@@ -62,12 +62,12 @@ while True:
 	# Draw text
 	if len(prediction) == 3: cv2.putText(debug3, text=prediction + " - " + decode(prediction), org=(550, 100), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
 
+	### End of loop
+
 	# Display the resulting frame
 	#cv2.imshow('frame', debug3)
 	#if cv2.waitKey(10) & 0xFF == ord('q'):
 		#break
-
-	### End of loop
 
 	# Resize image
 	final_frame = cv2.resize(debug3, (1080, 1920))  

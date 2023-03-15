@@ -1,7 +1,11 @@
 # Imports
+import io
 import cv2
 import time
+import socket
+import numpy as np
 from ftplib import FTP
+import matplotlib.pyplot as plt
 import paho.mqtt.client as mqtt
 
 # Script rate
@@ -11,26 +15,30 @@ rate = 0.2 # Seconds per loop
 client = mqtt.Client()
 client.connect("mqtt.eclipseprojects.io")
 
+# Params
+host = '10.5.5.100'
+port = 9876
+
+# Start file transfer
+ftp = FTP(host)
+ftp.login()
+ftp.cwd("RAMDisk")
+parent = ftp.pwd()
+
+# Command
+command = str.encode("EIC C:\Data\RAMDisk/test.bmp\r")
+
 # Loop
 while True:
 
 	# Get start time
 	t1 = time.time()
 
-	# Start file transfer
-	ftp = FTP("10.5.5.100")
-	ftp.login()
-	ftp.cwd("RAMDisk")
-	parent = ftp.pwd()
-
-	# Get filenames within the directory
-	directories = ftp.nlst()
-
-	# Check if there is a directory
-	if len(directories) == 0: continue
-
-	# Go to most recent image folder
-	ftp.cwd(parent +'/'+ directories[0])
+	# Make screenshot
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((host, port))
+	s.send(command)
+	s.close()
 
 	# Get images in folder
 	image_paths = ftp.nlst()
@@ -41,29 +49,33 @@ while True:
 	# Select required image
 	image_path = image_paths[0]
 
-	# Write to file
-	file = open('webserver/tmp/image2.jpg', 'wb')
-	ftp.retrbinary('RETR '+ image_path, file.write)
-	file.close()
+	# Retrieve file
+	r = io.BytesIO()
+	ftp.retrbinary('RETR '+ image_path, r.write)
+
+	# Publish data
+	image = np.asarray(bytearray(r.getvalue()), dtype="uint8")
+	image = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
 	# Delete frame
 	ftp.delete(image_path)
 
-	# Delete directory
-	ftp.rmd(parent +'/'+ directories[0]) 
-
-	# Resize image
-	final_frame = cv2.resize(final_image, (1080, 1920)) 
-
-	# Publish data
-	final_image = cv2.imread('webserver/tmp/image2.jpg')
-	data = cv2.imencode('.jpg', final_image)[1].tobytes()
-	client.publish("demo2_image", data)
-
 	# Quit ftp
-	ftp.quit()  
+	#ftp.quit()  
 
 	### End of loop
+
+	# Display the resulting frame
+	cv2.imshow('frame', image)
+	if cv2.waitKey(10) & 0xFF == ord('q'):
+		break
+
+	# Resize image
+	final_image = cv2.resize(image, (1080, 1920)) 
+
+	# Publish data
+	data = cv2.imencode('.jpg', final_image)[1].tobytes()
+	client.publish("demo2_image", data)
 
 	# Get end time
 	t2 = time.time()

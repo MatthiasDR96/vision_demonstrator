@@ -20,13 +20,13 @@ def extract_resistor(image):
 	contours = cv2.findContours(image_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
 	# Check if there are contours
-	if len(contours) == 0: return False, None, debug_image
+	if len(contours) == 0: return False, None, image
 
 	# Get largest contour
 	maxcontour = max(contours, key=cv2.contourArea)
 
 	# Check if contours are too big or too small
-	if cv2.contourArea(maxcontour) > 60000 or cv2.contourArea(maxcontour) < 30000: return False, None, debug_image
+	if cv2.contourArea(maxcontour) > 60000 or cv2.contourArea(maxcontour) < 30000: return False, None, image
 
 	# Get minimal area rectangle
 	rect = cv2.minAreaRect(maxcontour)
@@ -69,14 +69,14 @@ def align_resistor(image, rect):
 	if image_cropped.shape[1] == 0 or image_cropped.shape[0] == 0: return False, None, image_aligned
 
 	# Bilateral filtering
-	#image_cropped = cv2.bilateralFilter(image_cropped, 15, 35, 35)
+	image_cropped = cv2.bilateralFilter(image_cropped, 15, 35, 35)
 	
 	return True, image_cropped, image_aligned
 
 def extract_color_bands(image, crop):
 
 	# Check if input is okay
-	if crop is None: return False, [], crop
+	if crop is None: return False, [], image
 
 	# Get HSV calibration params 
 	hsvfile = np.load('data/demo3_hsv.npy')
@@ -109,13 +109,6 @@ def extract_color_bands(image, crop):
 		x,y,w,h = cv2.boundingRect(cnt)
 		if x < 250: remaining_contours.append(cnt)
 
-	# Plot
-	cv2.drawContours(crop, remaining_contours, -1, (0,255,0), 3)
-
-	# Debug image
-	debug_image = image.copy()
-	debug_image[0:crop.shape[0], 0:crop.shape[1]] = crop
-
 	# Check if enough contours
 	if len(remaining_contours) < 3: return False, [], debug_image
 
@@ -125,21 +118,29 @@ def extract_color_bands(image, crop):
 	# Sort contours from left to right
 	sorted_contours = sorted(largest_contours, key=lambda ctr: cv2.boundingRect(ctr)[1], reverse=True)
 
+	# Plot
+	cv2.drawContours(crop, sorted_contours, -1, (0,255,0), 3)
+
+	# Debug image
+	debug_image = image.copy()
+	debug_image[0:crop.shape[0], 0:crop.shape[1]] = crop
+
 	# Iterate over three contours
 	color_bands = []
 	for ctr in sorted_contours:
 
 		# Get roi
 		x,y,w,h = cv2.boundingRect(ctr)
-		roi = crop[y:y+h, x+5:x+w-5]
+		roi = hsv[y:y+h, x+5:x+w-5]
 
 		# Make training data
 		new_data = np.reshape(roi, (roi.shape[0]*roi.shape[1], roi.shape[2]))
 
-		# Get means of RGB data
-		mean_rgb = [np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]
+		# Get means of HSV data
+		mean_hsv = [np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]
 
 		# Predict
-		color_bands.append(mean_rgb)
+		color_bands.append(mean_hsv)
 
 	return True, color_bands, debug_image
+	

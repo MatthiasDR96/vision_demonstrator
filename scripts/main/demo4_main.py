@@ -3,7 +3,9 @@ import cv2
 import time
 import yaml
 import torch
+import numpy as np
 import torch.nn as nn
+import matplotlib.pyplot as plt
 from torchvision import models
 import paho.mqtt.client as mqtt
 import torchvision.transforms as transforms
@@ -22,6 +24,19 @@ cam = Camera("RealSense", config['color_resolution'], config['depth_resolution']
 # Init MQTT server
 client = mqtt.Client()
 client.connect("mqtt.eclipseprojects.io")
+
+# Define normalisation params
+mean = np.array([0.5, 0.5, 0.5])
+std = np.array([0.25, 0.25, 0.25])
+
+# Transforms.compose is used to perform multiple sequential transformations on an image
+data_transform = transforms.Compose([
+		transforms.ToPILImage(),
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std)
+    ])
 
 # Get trained model
 model = models.resnet34()
@@ -42,9 +57,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model= nn.DataParallel(model)
 model.to(device)
 
-# Define Transforms
-transform = transforms.ToTensor()
-
 # Loop
 with torch.no_grad():
 	while True:
@@ -53,10 +65,10 @@ with torch.no_grad():
 		t1 = time.time()
 
 		# Read frame
-		color_image, depth_image = cam.read()
-
+		image, _ = cam.read()
+		
 		# Transform data
-		tensor = transform(color_image)
+		tensor = data_transform(image)
 		tensor = tensor.unsqueeze(0)
 
 		# Predict class
@@ -64,12 +76,17 @@ with torch.no_grad():
 
 		# Print output
 		#color_image = cv2.rotate(color_image, cv2.ROTATE_90_CLOCKWISE)
-		cv2.putText(color_image, classes[output.argmax()], [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
+		cv2.putText(image, classes[output.argmax()], [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
 		
 		### End of loop
 
+		# Display the resulting frame
+		#cv2.imshow('frame', image)
+		#if cv2.waitKey(10) & 0xFF == ord('q'):
+			#break
+
 		# Resize image
-		final_image = cv2.resize(color_image, (1080, 1920)) 
+		final_image = cv2.resize(image, (1080, 1920)) 
 
 		# Publish data
 		data = cv2.imencode('.jpg', final_image)[1].tobytes()

@@ -5,6 +5,7 @@ import numpy as np
 import splitfolders
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 from torch.optim import lr_scheduler
 from torchvision.models import ResNet34_Weights
 from torchvision import datasets, models, transforms
@@ -16,14 +17,14 @@ std = np.array([0.25, 0.25, 0.25])
 # Transforms.compose is used to perform multiple sequential transformations on an image
 data_transforms = {
     'train': transforms.Compose([
-        #transforms.RandomResizedCrop(224),
-        #transforms.RandomHorizontalFlip(),
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ]),
     'val': transforms.Compose([
-        #transforms.Resize(256),
-        #transforms.CenterCrop(224),
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ]),
@@ -38,6 +39,32 @@ image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transf
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=10, shuffle=True, num_workers=0) for x in ['train', 'val']}  # random batches of size 10 are loaded instead of the whole dataset.
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
+
+# History
+y_loss = {}  
+y_loss['train'] = []
+y_loss['val'] = []
+y_err = {}
+y_err['train'] = []
+y_err['val'] = []
+x_epoch = []
+
+# Figure
+fig = plt.figure()
+ax0 = fig.add_subplot(121, title="loss")
+ax1 = fig.add_subplot(122, title="accuracy")
+
+# Draw function
+def draw_curve(current_epoch):
+    x_epoch.append(current_epoch)
+    ax0.plot(x_epoch, y_loss['train'], 'bo-', label='train')
+    ax0.plot(x_epoch, y_loss['val'], 'ro-', label='val')
+    ax1.plot(x_epoch, y_err['train'], 'bo-', label='train')
+    ax1.plot(x_epoch, y_err['val'], 'ro-', label='val')
+    if current_epoch == 0:
+        ax0.legend()
+        ax1.legend()
+    fig.savefig('data/train.jpg')
 
 # Train model
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
@@ -104,8 +131,16 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
 
+            # Add hist
+            y_loss[phase].append(epoch_loss)
+            y_err[phase].append(epoch_acc.item())
+
             # Print
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+
+            # Draw curve
+            if phase == 'val':
+                draw_curve(epoch)
 
             # Deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
