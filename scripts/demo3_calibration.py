@@ -12,7 +12,7 @@ with open("config/demo1_config.yaml", 'r') as stream:
 cam = Camera('Basler', 0, 0, 0, 0)
 
 # Read data from previous calibrations
-hsvfile = numpy.load('data/demo3_hsv.npy')
+hsvfile = numpy.load('data/demo3_hsv_background.npy')
 
 def nothing(*args):
     pass
@@ -93,4 +93,4 @@ while True:
 
 # Save data
 hsvarray = numpy.array([hmin, hmax, smin, smax, vmin, vmax])
-numpy.save('data/demo3_hsv.npy', hsvarray)
+numpy.save('data/demo3_hsv_background.npy', hsvarray)

@@ -9,24 +9,25 @@ import matplotlib.pyplot as plt
 import paho.mqtt.client as mqtt
 
 # Script rate
-rate = 0.2 # Seconds per loop
+rate = 0.5 # Seconds per loop
 
 # Init MQTT server
-client = mqtt.Client()
+client = mqtt.Client(client_id="", clean_session=True, userdata=None)
 client.connect("mqtt.eclipseprojects.io")
+client.max_queued_messages_set(1)
 
 # Params
 host = '10.5.5.100'
 port = 9876
+
+# Command
+command = str.encode("EIC C:\Data\RAMDisk/test\r")
 
 # Start file transfer
 ftp = FTP(host)
 ftp.login()
 ftp.cwd("RAMDisk")
 parent = ftp.pwd()
-
-# Command
-command = str.encode("EIC C:\Data\RAMDisk/test.bmp\r")
 
 # Loop
 while True:
@@ -51,24 +52,30 @@ while True:
 
 	# Retrieve file
 	r = io.BytesIO()
-	ftp.retrbinary('RETR '+ image_path, r.write)
+	try:
+		ftp.retrbinary('RETR '+ image_path, r.write)
+	except:
+		continue
 
 	# Publish data
 	image = np.asarray(bytearray(r.getvalue()), dtype="uint8")
 	image = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
-	# Delete frame
-	ftp.delete(image_path)
+	# Get images in folder
+	image_paths = ftp.nlst()
 
-	# Quit ftp
-	#ftp.quit()  
-
+	# Check if there is an image and delete if exist
+	try:
+		ftp.delete(image_path)
+	except:
+		continue
+		
 	### End of loop
 
 	# Display the resulting frame
-	cv2.imshow('frame', image)
-	if cv2.waitKey(10) & 0xFF == ord('q'):
-		break
+	#cv2.imshow('frame', image)
+	#if cv2.waitKey(10) & 0xFF == ord('q'):
+		#break
 
 	# Resize image
 	final_image = cv2.resize(image, (1080, 1920)) 
@@ -88,4 +95,3 @@ while True:
 
 	# Print
 	print("Demo 2 - sawblade - running at cycle time of " + str(t3-t1) + " seconds")
-

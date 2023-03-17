@@ -110,7 +110,7 @@ class CameraBasler:
 
 		# Start grabbing
 		self.camera.Open()
-		self.camera.StartGrabbing(1)
+		self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
 
 		# Converter for opencv
 		self.converter = pylon.ImageFormatConverter()
@@ -119,14 +119,12 @@ class CameraBasler:
 
 	def stop(self):
 		self.camera.StopGrabbing()
+		#self.camera.Close()
 
 	def read(self):
 		
 		while True:
-			try:
-				grab = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
-			except:
-				continue
+			grab = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
 			if grab.GrabSucceeded():
 				image = self.converter.Convert(grab)
 				image = image.GetArray()  
@@ -134,7 +132,6 @@ class CameraBasler:
 			else:
 				image = None   
 			grab.Release()
-		
 		return image, image
 			
 

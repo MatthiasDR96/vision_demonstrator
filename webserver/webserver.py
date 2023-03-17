@@ -52,8 +52,8 @@ def gen(stream_id):
 		if frame4 is None: frame4 = np.zeros((screen_size[0],screen_size[1],3), np.uint8)
 
 		# Concat frames
-		row1 = np.hstack([frame1, frame2])
-		row2 = np.hstack([frame3, frame4])
+		row1 = np.hstack([frame1]) #, frame2])
+		row2 = np.hstack([frame3]) #frame4])
 		frame = np.vstack([row1, row2])
 
 		# Resize image to fit screen
@@ -85,4 +85,4 @@ def video_feed(stream_id):
 if __name__ == '__main__':
 
 	# Run app
-	app.run(host='0.0.0.0', debug=True)
+	app.run(host='0.0.0.0', debug=False)

@@ -13,7 +13,7 @@ from vision_demonstrator.Camera import Camera
 from torchvision.models import ResNet34_Weights
 
 # Script rate
-rate = 0.2 # Seconds per loop
+rate = 0.5 # Seconds per loop
 
 # Load params
 with open("config/demo4_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
@@ -22,8 +22,9 @@ with open("config/demo4_config.yaml", 'r') as stream: config = yaml.safe_load(st
 cam = Camera("RealSense", config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
 # Init MQTT server
-client = mqtt.Client()
+client = mqtt.Client(client_id="", clean_session=True, userdata=None)
 client.connect("mqtt.eclipseprojects.io")
+client.max_queued_messages_set(1)
 
 # Define normalisation params
 mean = np.array([0.5, 0.5, 0.5])
@@ -47,7 +48,7 @@ classes = ["No defect", "Nut", "Scratch", ]
 
 # Create new classification part
 model.fc = nn.Linear(num_ftrs, len(classes))
-model.load_state_dict(torch.load('data/model6.pth'), strict=False)
+model.load_state_dict(torch.load('data/model4.pth'), strict=False)
 
 # Put model in evaluation mode
 model.eval()

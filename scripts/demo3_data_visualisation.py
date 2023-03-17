@@ -5,6 +5,8 @@ from mpl_toolkits.mplot3d import Axes3D
 # Load data
 df = pd.read_csv("data/color_data.csv")
 
+c=df['Class'].map({'x':'gray','r':'r','z':'brown','k':'k','b':'b','v':'m','g':'g'})
+
 # Set figure
 fig = plt.figure(figsize=(12, 9))
 ax = Axes3D(fig)
@@ -13,7 +15,7 @@ ax = Axes3D(fig)
 y = df['H']
 x = df['S']
 z = df['V']
-ax.scatter(x,y,z, c=df['H'])
+ax.scatter(x,y,z, c=c)
 
 # Set axis
 ax.set_ylabel('H')

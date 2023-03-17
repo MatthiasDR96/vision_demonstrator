@@ -9,7 +9,7 @@ def extract_resistor(image):
 	image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 	# Threshold background
-	_, threshed = cv2.threshold(image_gray, 230, 255, cv2.THRESH_BINARY_INV)
+	_, threshed = cv2.threshold(image_gray, 220, 255, cv2.THRESH_BINARY_INV)
 
 	# Morphological transformations to remove sticks
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20,20))
@@ -79,13 +79,16 @@ def extract_color_bands(image, crop):
 	if crop is None: return False, [], image
 
 	# Get HSV calibration params 
-	hsvfile = np.load('data/demo3_hsv.npy')
+	hsvfile1 = np.load('data/demo3_hsv_resistor.npy')
+	hsvfile2 = np.load('data/demo3_hsv_background.npy')
 
 	# Convert image to HSV
 	hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
 
 	# Remove area in between color bands
-	mask = cv2.inRange(hsv, np.array([hsvfile[0], hsvfile[2], hsvfile[4]]), np.array([hsvfile[1], hsvfile[3], hsvfile[5]]))
+	mask1 = cv2.bitwise_not(cv2.inRange(hsv, np.array([hsvfile1[0], hsvfile1[2], hsvfile1[4]]), np.array([hsvfile1[1], hsvfile1[3], hsvfile1[5]])))
+	mask2 = cv2.inRange(hsv, np.array([hsvfile2[0], hsvfile2[2], hsvfile2[4]]), np.array([hsvfile2[1], hsvfile2[3], hsvfile2[5]]))
+	mask = cv2.bitwise_and(mask1, mask2)
 
 	# Morphological transformations to remove sticks
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))

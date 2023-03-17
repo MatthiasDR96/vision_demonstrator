@@ -11,14 +11,15 @@ from vision_demonstrator.preprocessing import *
 from sklearn.preprocessing import LabelEncoder 
 
 # Script rate
-rate = 0.2 # Seconds per loop
+rate = 0.1 # Seconds per loop
 
 # Create camera object
 cam = Camera('Basler', 0, 0, 0, 0)
 
 # Init MQTT server
-client = mqtt.Client()
+client = mqtt.Client(client_id="", clean_session=True, userdata=None)
 client.connect("mqtt.eclipseprojects.io")
+client.max_queued_messages_set(1)
 
 # Load data
 df = pd.read_csv("data/color_data.csv")
@@ -65,7 +66,7 @@ while True:
 	### End of loop
 
 	# Display the resulting frame
-	#cv2.imshow('frame', debug3)
+	#♣cv2.imshow('frame', debug3)
 	#if cv2.waitKey(10) & 0xFF == ord('q'):
 		#break
 

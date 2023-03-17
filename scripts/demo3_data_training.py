@@ -11,6 +11,8 @@ df = pd.read_csv("data/color_data.csv")
 labelencoder= LabelEncoder() 
 df['Class'] = labelencoder.fit_transform(df['Class'])
 
+df.fillna(0, inplace=True)
+
 # Train
 clf = svm.SVC()
 clf.fit(df[['H', 'S', 'V']].values, df['Class'].values)

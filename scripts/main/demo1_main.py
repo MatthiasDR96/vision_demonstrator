@@ -9,7 +9,7 @@ from vision_demonstrator.Camera import Camera
 from vision_demonstrator.camera_callibration import *
 
 # Script rate
-rate = 0.2 # Seconds per loop
+rate = 0.5 # Seconds per loop
 
 # Load params
 with open("config/demo1_config.yaml", 'r') as stream: config = yaml.safe_load(stream)
@@ -18,8 +18,9 @@ with open("config/demo1_config.yaml", 'r') as stream: config = yaml.safe_load(st
 cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
 # Init MQTT server
-client = mqtt.Client()
+client = mqtt.Client(client_id="", clean_session=True, userdata=None)
 client.connect("mqtt.eclipseprojects.io")
+client.max_queued_messages_set(1)
 
 # Get HSV calibration params 
 hsvfile = np.load('data/demo1_hsv.npy')
