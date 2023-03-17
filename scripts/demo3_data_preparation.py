@@ -29,10 +29,9 @@ for i in glob.glob('data/resistor_images/*jpg'):
 	# Extract color band contours
 	ret, bands, debug3 = extract_color_bands(debug1, crop)
 
-	# Display the resulting frame
-	cv2.imshow('frame', debug3)
-	if cv2.waitKey(10) & 0xFF == ord('q'):
-		break
+	# Plot
+	#cv2.imshow('Data preparation', debug3)
+	#cv2.waitKey(1)
 
 	# Iterate over color bands
 	for j, band in enumerate(bands):

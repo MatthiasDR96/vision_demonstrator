@@ -99,16 +99,16 @@ def extract_color_bands(image, crop):
 	contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
 	# Plot
-	cv2.drawContours(crop, contours, -1, (255,0,0), 3)
+	crop_ = cv2.drawContours(crop.copy(), contours, -1, (255,0,0), 3)
 
 	# Debug image
 	debug_image = image.copy()
-	debug_image[0:crop.shape[0], 0:crop.shape[1]] = crop
+	debug_image[0:crop_.shape[0], 0:crop_.shape[1]] = crop_
 
 	# Remove contours outside ROI
 	remaining_contours = []
 	for cnt in contours:
-		if cv2.contourArea(cnt) < 50: continue
+		if cv2.contourArea(cnt) < 1000: continue
 		x,y,w,h = cv2.boundingRect(cnt)
 		if x < 250: remaining_contours.append(cnt)
 
@@ -119,14 +119,17 @@ def extract_color_bands(image, crop):
 	largest_contours = sorted(remaining_contours, key=cv2.contourArea, reverse=True)[0:3]
 
 	# Sort contours from left to right
-	sorted_contours = sorted(largest_contours, key=lambda ctr: cv2.boundingRect(ctr)[1], reverse=True)
+	sorted_contours = sorted(largest_contours, key=lambda ctr: cv2.boundingRect(ctr)[0])
 
 	# Plot
-	cv2.drawContours(crop, sorted_contours, -1, (0,255,0), 3)
+	crop_ = cv2.drawContours(crop.copy(), sorted_contours, -1, (0,255,0), 3)
 
 	# Debug image
 	debug_image = image.copy()
-	debug_image[0:crop.shape[0], 0:crop.shape[1]] = crop
+	debug_image[0:crop_.shape[0], 0:crop_.shape[1]] = crop_
+
+	# Mask hsv
+	hsv = cv2.bitwise_and(hsv, hsv, mask=mask)
 
 	# Iterate over three contours
 	color_bands = []
@@ -134,13 +137,18 @@ def extract_color_bands(image, crop):
 
 		# Get roi
 		x,y,w,h = cv2.boundingRect(ctr)
-		roi = hsv[y:y+h, x+5:x+w-5]
+		roi = hsv[y+10:y+h-10, x+10:x+w-10]
 
-		# Make training data
-		new_data = np.reshape(roi, (roi.shape[0]*roi.shape[1], roi.shape[2]))
+		# Check if cropped image has some rows and columns
+		if roi.shape[1] == 0 or roi.shape[0] == 0: return False, [], debug_image
+
+		# Get hsv
+		roi_h = [i for i in roi[:,:,0].ravel() if i != 0]  
+		roi_s = [i for i in roi[:,:,1].ravel() if i != 0]  
+		roi_v = [i for i in roi[:,:,2].ravel() if i != 0]  
 
 		# Get means of HSV data
-		mean_hsv = [np.mean(new_data[:,0]), np.mean(new_data[:,1]), np.mean(new_data[:,2])]
+		mean_hsv = [np.mean(roi_h), np.mean(roi_s), np.mean(roi_v)]
 
 		# Predict
 		color_bands.append(mean_hsv)

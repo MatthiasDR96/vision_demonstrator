@@ -66,9 +66,9 @@ while True:
 	### End of loop
 
 	# Display the resulting frame
-	#♣cv2.imshow('frame', debug3)
-	#if cv2.waitKey(10) & 0xFF == ord('q'):
-		#break
+	cv2.imshow('frame', debug3)
+	if cv2.waitKey(10) & 0xFF == ord('q'):
+		break
 
 	# Resize image
 	final_frame = cv2.resize(debug3, (1080, 1920))  

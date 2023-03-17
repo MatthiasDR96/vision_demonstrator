@@ -12,14 +12,14 @@ path_data = "data/resistor_images/"
 if not os.path.exists(path_data): os.makedirs(path_data)
 
 # Get last sample number
-arr = sorted(os.listdir("data/resistor_images/"), key=lambda str: int(str.split('_')[0]))
-last_sample_number = int(arr[-1].split('_')[0])
+#arr = sorted(os.listdir("data/resistor_images/"), key=lambda str: int(str.split('_')[0]))
+#last_sample_number = int(arr[-1].split('_')[0])
 
 # Create camera object
 cam = Camera('Basler', 0, 0, 0, 0)
 
 # Data generation loop
-counter = last_sample_number + 1
+counter = 1 #last_sample_number + 1
 print("\nData collection started.")
 print("\nPress space bar to save a frame from the camera (click on image window)")
 while True: # For all samples

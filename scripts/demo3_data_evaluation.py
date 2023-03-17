@@ -50,20 +50,20 @@ for i in glob.glob('data/resistor_images/*jpg'):
 		pred = model.predict([band])
 
 		# Convert to class
-		pred = labelencoder.inverse_transform(pred)[0]
-		prediction += pred
+		prediction += labelencoder.inverse_transform(pred)[0]
 
-	# Accuracy
-	if prediction == label: correct += 1
+	# Draw text
+	if len(prediction) == 3:
 
-	# Print result
-	#print(prediction)
-	#print(decode(label) + ' - ' + decode(prediction))
+		# Accuracy
+		if prediction == label: correct += 1
 
-	# Plot
-	#cv2.putText(img=image, text=prediction + " - " + decode(prediction), org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
-	#plt.imshow(image)
-	#plt.show()
+		# Plot text
+		cv2.putText(img=debug3, text=prediction + " - " + decode(prediction), org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 255, 0),thickness=3)
+	
+	# Show
+	#cv2.imshow('Data evaluation', debug3)
+	#cv2.waitKey(1)
 
 # Get last sample number
 print("Accuracy: " + str(correct/len(os.listdir("data/resistor_images/"))*100) + ' %')

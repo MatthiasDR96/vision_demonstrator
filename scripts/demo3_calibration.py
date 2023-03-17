@@ -4,6 +4,9 @@ import yaml
 import numpy
 from vision_demonstrator.Camera import Camera
 
+# File
+file = 'data/demo3_hsv_background.npy'
+
 # Load params
 with open("config/demo1_config.yaml", 'r') as stream:
     config = yaml.safe_load(stream)
@@ -12,7 +15,7 @@ with open("config/demo1_config.yaml", 'r') as stream:
 cam = Camera('Basler', 0, 0, 0, 0)
 
 # Read data from previous calibrations
-hsvfile = numpy.load('data/demo3_hsv_background.npy')
+hsvfile = numpy.load(file)
 
 def nothing(*args):
     pass
@@ -93,4 +96,4 @@ while True:
 
 # Save data
 hsvarray = numpy.array([hmin, hmax, smin, smax, vmin, vmax])
-numpy.save('data/demo3_hsv_background.npy', hsvarray)
+numpy.save(file, hsvarray)
