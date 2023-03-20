@@ -3,6 +3,8 @@ import cv2
 import numpy
 from pypylon import pylon
 import pyrealsense2 as realsense
+import ids_peak.ids_peak as ids_peak
+import ids_peak_ipl.ids_peak_ipl as ids_ipl
 
 # Camera class
 class Camera:
@@ -23,6 +25,11 @@ class Camera:
 			
 			# Camera
 			self.cam = CameraBasler()
+
+		elif type == "IDS":
+			
+			# Camera
+			self.cam = CameraIDS()
 
 	def start(self):
 		return self.cam.start()
@@ -92,8 +99,6 @@ class CameraRealsense:
 		color = numpy.asanyarray(color_frame.get_data())
 		
 		return color, depth
-
-	
 		
 # Basler camera class
 class CameraBasler:
@@ -134,6 +139,61 @@ class CameraBasler:
 			grab.Release()
 		return image, image
 			
+# IDS camera class
+class CameraIDS:
+
+	def __init__(self):
+
+		# Get camera instance
+		ids_peak.Library.Initialize()
+		device_manager = ids_peak.DeviceManager.Instance()
+		device_manager.Update()
+		device_descriptors = device_manager.Devices()
+		self.device = device_descriptors[0].OpenDevice(ids_peak.DeviceAccessType_Exclusive)
+		self.remote_device_nodemap = self.device.RemoteDevice().NodeMaps()[0]
+
+		# Start camera 
+		self.start()
+
+	def start(self):
+
+		self.remote_device_nodemap.FindNode("TriggerSelector").SetCurrentEntry("ExposureStart")
+		self.remote_device_nodemap.FindNode("TriggerSource").SetCurrentEntry("Software")
+		self.remote_device_nodemap.FindNode("TriggerMode").SetCurrentEntry("On")
+
+		self.datastream = self.device.DataStreams()[0].OpenDataStream()
+		payload_size = self.remote_device_nodemap.FindNode("PayloadSize").Value()
+		for _ in range(self.datastream.NumBuffersAnnouncedMinRequired()):
+			buffer = self.datastream.AllocAndAnnounceBuffer(payload_size)
+			self.datastream.QueueBuffer(buffer)
+
+		self.datastream.StartAcquisition()
+		self.remote_device_nodemap.FindNode("AcquisitionStart").Execute()
+		self.remote_device_nodemap.FindNode("AcquisitionStart").WaitUntilDone()
+
+	def stop(self):
+		pass
+
+	def read(self):
+		
+		# Trigger image
+		self.remote_device_nodemap.FindNode("TriggerSoftware").Execute()
+		buffer = self.datastream.WaitForFinishedBuffer(1000)
+		raw_image = ids_ipl.Image_CreateFromSizeAndBuffer(buffer.PixelFormat(), buffer.BasePtr(), buffer.Size(), buffer.Width(), buffer.Height())
+
+		# Convert to opencv image
+		color_image = raw_image.ConvertTo(ids_ipl.PixelFormatName_RGB8)
+		self.datastream.QueueBuffer(buffer)
+		image = color_image.get_numpy_3D()
+		image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+		# Crop to lower resolution
+		image = image[int((image.shape[0]-1080)/2):image.shape[0] - int((image.shape[0]-1080)/2), int((image.shape[1]-1920)/2):image.shape[1] - int((image.shape[1]-1920)/2)]
+		return image, image
+			
+
+
+	
 
 
 	

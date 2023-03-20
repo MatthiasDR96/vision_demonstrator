@@ -30,8 +30,8 @@ for i in glob.glob('data/resistor_images/*jpg'):
 	ret, bands, debug3 = extract_color_bands(debug1, crop)
 
 	# Plot
-	#cv2.imshow('Data preparation', debug3)
-	#cv2.waitKey(1)
+	cv2.imshow('Data preparation', debug3)
+	cv2.waitKey(1)
 
 	# Iterate over color bands
 	for j, band in enumerate(bands):

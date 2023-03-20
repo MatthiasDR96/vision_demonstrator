@@ -9,10 +9,10 @@ def extract_resistor(image):
 	image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 	# Threshold background
-	_, threshed = cv2.threshold(image_gray, 220, 255, cv2.THRESH_BINARY_INV)
+	_, threshed = cv2.threshold(image_gray, 230, 255, cv2.THRESH_BINARY_INV)
 
 	# Morphological transformations to remove sticks
-	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20,20))
+	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15,15))
 	morphed_open = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel)
 	image_thresh = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
 
@@ -26,7 +26,7 @@ def extract_resistor(image):
 	maxcontour = max(contours, key=cv2.contourArea)
 
 	# Check if contours are too big or too small
-	if cv2.contourArea(maxcontour) > 60000 or cv2.contourArea(maxcontour) < 30000: return False, None, image
+	if cv2.contourArea(maxcontour) > 20000 or cv2.contourArea(maxcontour) < 10000: return False, None, image
 
 	# Get minimal area rectangle
 	rect = cv2.minAreaRect(maxcontour)
@@ -108,7 +108,7 @@ def extract_color_bands(image, crop):
 	# Remove contours outside ROI
 	remaining_contours = []
 	for cnt in contours:
-		if cv2.contourArea(cnt) < 1000: continue
+		#if cv2.contourArea(cnt) < 1000: continue
 		x,y,w,h = cv2.boundingRect(cnt)
 		if x < 250: remaining_contours.append(cnt)
 
@@ -137,7 +137,7 @@ def extract_color_bands(image, crop):
 
 		# Get roi
 		x,y,w,h = cv2.boundingRect(ctr)
-		roi = hsv[y+10:y+h-10, x+10:x+w-10]
+		roi = hsv[y+10:y+h-10, x+5:x+w-5]
 
 		# Check if cropped image has some rows and columns
 		if roi.shape[1] == 0 or roi.shape[0] == 0: return False, [], debug_image

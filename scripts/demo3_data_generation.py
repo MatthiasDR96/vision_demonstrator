@@ -16,7 +16,7 @@ if not os.path.exists(path_data): os.makedirs(path_data)
 #last_sample_number = int(arr[-1].split('_')[0])
 
 # Create camera object
-cam = Camera('Basler', 0, 0, 0, 0)
+cam = Camera('IDS', 0, 0, 0, 0)
 
 # Data generation loop
 counter = 1 #last_sample_number + 1

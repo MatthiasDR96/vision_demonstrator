@@ -9,7 +9,7 @@ from flask import Flask, Response, render_template
 app = Flask(__name__)
 
 # Params
-screen_size = (1920, 1080)
+screen_size = (1920, 1080-120)
 
 # Define streams
 stream = {"demo1_image": None, "demo2_image": None, "demo3_image": None, "demo4_image": None}

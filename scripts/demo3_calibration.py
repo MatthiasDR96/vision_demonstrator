@@ -12,7 +12,7 @@ with open("config/demo1_config.yaml", 'r') as stream:
     config = yaml.safe_load(stream)
 
 # Create camera object
-cam = Camera('Basler', 0, 0, 0, 0)
+cam = Camera('IDS', 0, 0, 0, 0)
 
 # Read data from previous calibrations
 hsvfile = numpy.load(file)

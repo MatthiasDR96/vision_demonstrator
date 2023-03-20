@@ -11,10 +11,10 @@ from vision_demonstrator.preprocessing import *
 from sklearn.preprocessing import LabelEncoder 
 
 # Script rate
-rate = 0.1 # Seconds per loop
+rate = 0.5 # Seconds per loop
 
 # Create camera object
-cam = Camera('Basler', 0, 0, 0, 0)
+cam = Camera('IDS', 0, 0, 0, 0)
 
 # Init MQTT server
 client = mqtt.Client(client_id="", clean_session=True, userdata=None)
