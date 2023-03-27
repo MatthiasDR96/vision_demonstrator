@@ -17,9 +17,9 @@ camera_id = '821312060313'  # To be found in Realsense Viewer
 root = "data/defect_images"
 
 # Folders
-path_class_nut = f"{root}/nut"
-path_class_large_scratch = f"{root}/scratch"
-path_class_ok = f"{root}/no_defect"
+path_class_nut = f"{root}/nut_new"
+path_class_large_scratch = f"{root}/scratch_new"
+path_class_ok = f"{root}/no_defect_new"
 
 # Create folders
 if not os.path.exists(path_class_nut):

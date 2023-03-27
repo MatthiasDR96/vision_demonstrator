@@ -82,9 +82,9 @@ with torch.no_grad():
 		### End of loop
 
 		# Display the resulting frame
-		#cv2.imshow('frame', image)
-		#if cv2.waitKey(10) & 0xFF == ord('q'):
-			#break
+		cv2.imshow('frame', image)
+		if cv2.waitKey(10) & 0xFF == ord('q'):
+			break
 
 		# Resize image
 		final_image = cv2.resize(image, (1080, 1920)) 
