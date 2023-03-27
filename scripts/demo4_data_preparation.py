@@ -1,7 +1,7 @@
 import os
 import cv2
 import torchvision
-# from rembg import remove
+from rembg import remove
 from torchvision import transforms
 from torchvision.io import read_image
 
@@ -10,7 +10,7 @@ output_path = "processed_data_3"
 
 # Processing steps (comment out unneeded things)
 copy = True
-crop = True
+crop = False
 remove_background = False
 resize, dimension = True, 512
 transform, variants = False, 3
