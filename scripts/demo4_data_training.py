@@ -17,24 +17,24 @@ std = np.array([0.25, 0.25, 0.25])
 # Transforms.compose is used to perform multiple sequential transformations on an image
 data_transforms = {
     'train': transforms.Compose([
-        transforms.RandomResizedCrop(224),
+        #transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ]),
     'val': transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        #transforms.Resize(256),
+        #transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ]),
 }
 
 # Split data
-#splitfolders.ratio("data/defect_images", output="data/defect_images", seed=1337, ratio=(0.7,0.3))
+splitfolders.ratio("data/defect_images/processed", output="data/defect_images", seed=1337, ratio=(0.7,0.3))
 
 # Split data in train and test
-data_dir = "data/defect_images"
+data_dir = "data/defect_images/processed"
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}  # a dict is created with key values train and val. The values are the transformed data from the respective folders.
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=10, shuffle=True, num_workers=0) for x in ['train', 'val']}  # random batches of size 10 are loaded instead of the whole dataset.
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -183,4 +183,4 @@ step_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 model = train_model(model, criterion, optimizer, step_lr_scheduler, num_epochs=30)
 
 # Save model
-torch.save(model.state_dict(), 'data/model4.pth')
+torch.save(model.state_dict(), 'data/model4_1.pth')

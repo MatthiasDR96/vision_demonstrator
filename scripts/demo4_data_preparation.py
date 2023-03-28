@@ -5,15 +5,15 @@ from rembg import remove
 from torchvision import transforms
 from torchvision.io import read_image
 
-input_path = "raw_data2"  # change to the appropriate path
-output_path = "processed_data_3"
+input_path = "data\\defect_images\\raw"  # change to the appropriate path
+output_path = "data\\defect_images\\processed"
 
 # Processing steps (comment out unneeded things)
 copy = True
 crop = False
-remove_background = False
+remove_background = True
 resize, dimension = True, 512
-transform, variants = False, 3
+transform, variants = True, 4
 threshold = False
 
 if __name__ == "__main__":
@@ -29,8 +29,8 @@ if __name__ == "__main__":
                 # Processing steps
                 if crop:
                     img = img[0:1080, 840:1920]
-                # if remove_background:
-                    # img = remove(img)
+                if remove_background:
+                    img = remove(img)
                 cv2.imwrite(f"{output_path}/{img_class}/{image}", img)
 
     if resize or transform:
@@ -43,9 +43,8 @@ if __name__ == "__main__":
                                                                interpolation=transforms.InterpolationMode.BILINEAR)])
                     img = re(img)
                 if transform:
-                    t1 = transforms.Compose([transforms.RandomAffine(degrees=(5, 355), translate=(0.1, 0.2),
-                                                                     scale=(0.7, 1.2))])  # affine transformations
-                    t2 = transforms.Compose([transforms.ColorJitter(brightness=[0.8, 1.5], contrast=[0.8, 1.5])])  # color jitter
+                    t1 = transforms.Compose([transforms.RandomAffine(degrees=(5, 30))])  # affine transformations
+                    t2 = transforms.Compose([transforms.ColorJitter(brightness=[0.6, 1.2], contrast=[0.6, 1.2])])  # color jitter
 
                     image_original = t2(t1(img))
                     torchvision.utils.save_image(image_original / 255, f"{output_path}/{img_class}/{image}")
