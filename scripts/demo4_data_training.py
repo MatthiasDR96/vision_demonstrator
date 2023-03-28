@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.optim import lr_scheduler
-from torchvision.models import ResNet34_Weights
+from torchvision.models import ResNet34_Weights, ResNet50_Weights
 from torchvision import datasets, models, transforms
 
 # Define normalisation params
@@ -31,12 +31,12 @@ data_transforms = {
 }
 
 # Split data
-splitfolders.ratio("data/defect_images/processed", output="data/defect_images", seed=1337, ratio=(0.7,0.3))
+#splitfolders.ratio("data/defect_images/processed", output="data/defect_images", seed=1337, ratio=(0.7,0.3))
 
 # Split data in train and test
-data_dir = "data/defect_images/processed"
+data_dir = "data/defect_images/datasets"
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}  # a dict is created with key values train and val. The values are the transformed data from the respective folders.
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=10, shuffle=True, num_workers=0) for x in ['train', 'val']}  # random batches of size 10 are loaded instead of the whole dataset.
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=20, shuffle=True, num_workers=0) for x in ['train', 'val']}  # random batches of size 10 are loaded instead of the whole dataset.
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
 
@@ -64,7 +64,7 @@ def draw_curve(current_epoch):
     if current_epoch == 0:
         ax0.legend()
         ax1.legend()
-    fig.savefig('data/train.jpg')
+    fig.savefig('data/train_model4_resnet50_2.jpg')
 
 # Train model
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
@@ -158,14 +158,15 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     return model
 
 # Get trained model
-model = models.resnet34(weights=ResNet34_Weights.IMAGENET1K_V1)
+model = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
 num_ftrs = model.fc.in_features
 
 # Freeze all the parameters except the ones which are created after this for loop
 for param in model.parameters(): param.requires_grad = False
 
 # Create new classification model
-model.fc = nn.Linear(num_ftrs, len(class_names))  
+model.fc = nn.Sequential(#nn.Dropout(p=0.2, inplace=True), 
+                         nn.Linear(num_ftrs, len(class_names)))
 
 # Link model to device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -174,13 +175,13 @@ model.to(device)
 
 # Set learning params
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.8)    # original values 0.001 and 0.9
 
-# StepLR decays the learning rate every 7 epochs by a factor of 0.1
-step_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
+# StepLR decays the learning rate every n epochs by a factor of 0.1
+step_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=6, gamma=0.1)
 
 # Train model
 model = train_model(model, criterion, optimizer, step_lr_scheduler, num_epochs=30)
 
 # Save model
-torch.save(model.state_dict(), 'data/model4_1.pth')
+torch.save(model.state_dict(), 'data/model4_resnet50_2.pth')
