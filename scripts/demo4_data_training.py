@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.optim import lr_scheduler
-from torchvision.models import ResNet34_Weights, ResNet50_Weights
+from torchvision.models import ResNet34_Weights, ResNet50_Weights, ResNet101_Weights, ResNet152_Weights
 from torchvision import datasets, models, transforms
 
 # Define normalisation params
@@ -64,7 +64,7 @@ def draw_curve(current_epoch):
     if current_epoch == 0:
         ax0.legend()
         ax1.legend()
-    fig.savefig('data/train_model4_resnet50_2.jpg')
+    fig.savefig('data/train_model4_resnet50_3.jpg')
 
 # Train model
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
@@ -175,13 +175,13 @@ model.to(device)
 
 # Set learning params
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.8)    # original values 0.001 and 0.9
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)    # original values 0.001 and 0.9
 
 # StepLR decays the learning rate every n epochs by a factor of 0.1
 step_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=6, gamma=0.1)
 
 # Train model
-model = train_model(model, criterion, optimizer, step_lr_scheduler, num_epochs=30)
+model = train_model(model, criterion, optimizer, step_lr_scheduler, num_epochs=20)
 
 # Save model
-torch.save(model.state_dict(), 'data/model4_resnet50_2.pth')
+torch.save(model.state_dict(), 'data/model4_resnet50_3.pth')
