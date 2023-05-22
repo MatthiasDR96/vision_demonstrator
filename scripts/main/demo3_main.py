@@ -68,13 +68,10 @@ while True:
 	# Display the resulting frame
 	#cv2.imshow('frame', debug3)
 	#if cv2.waitKey(10) & 0xFF == ord('q'):
-		#break
-
-	# Resize image
-	final_frame = cv2.resize(debug3, (1080, 1920))  
+		#break 
 
 	# Publish data
-	data = cv2.imencode('.jpg', final_frame)[1].tobytes()
+	data = cv2.imencode('.jpg', debug3)[1].tobytes()
 	client.publish("demo3_image", data)
 
 	# Get end time

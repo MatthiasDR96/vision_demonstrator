@@ -107,9 +107,6 @@ while True:
 
 	### End of loop
 
-	# Resize image
-	final_image = cv2.resize(final_image, (1080, 1920)) 
-
 	# Publish data
 	data = cv2.imencode('.jpg', final_image)[1].tobytes()
 	client.publish("demo1_image", data)

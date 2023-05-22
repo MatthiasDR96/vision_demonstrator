@@ -51,6 +51,12 @@ def gen(stream_id):
 		if frame3 is None: frame3 = np.zeros((screen_size[0],screen_size[1],3), np.uint8)
 		if frame4 is None: frame4 = np.zeros((screen_size[0],screen_size[1],3), np.uint8)
 
+		# Resize frames
+		frame1 = cv2.resize(frame1, screen_size)  
+		frame2 = cv2.resize(frame2, screen_size)  
+		frame3 = cv2.resize(frame3, screen_size)  
+		frame4 = cv2.resize(frame4, screen_size)  
+
 		# Concat frames
 		row1 = np.hstack([frame1, frame2])
 		row2 = np.hstack([frame3, frame4])

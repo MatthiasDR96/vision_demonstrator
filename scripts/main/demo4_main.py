@@ -10,7 +10,6 @@ from torchvision import models
 import paho.mqtt.client as mqtt
 import torchvision.transforms as transforms
 from vision_demonstrator.Camera import Camera
-from torchvision.models import ResNet34_Weights
 
 # Script rate
 rate = 0.5 # Seconds per loop
@@ -47,16 +46,16 @@ num_ftrs = model.fc.in_features
 classes = ["No defect", "Nut", "Scratch", ]
 
 # Create new classification part
-model.fc = nn.Linear(num_ftrs, len(classes))
-model.load_state_dict(torch.load('data/model4.pth'), strict=False)
+#model.fc = nn.Linear(num_ftrs, len(classes))
+#model.load_state_dict(torch.load('data/model4.pth'), strict=False)
 
 # Put model in evaluation mode
-model.eval()
+#model.eval()
 
 # Link model to device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model= nn.DataParallel(model)
-model.to(device)
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#model= nn.DataParallel(model)
+#model.to(device)
 
 # Loop
 with torch.no_grad():
@@ -69,28 +68,28 @@ with torch.no_grad():
 		image, _ = cam.read()
 		
 		# Transform data
-		tensor = data_transform(image)
-		tensor = tensor.unsqueeze(0)
+		#tensor = data_transform(image)
+		#tensor = tensor.unsqueeze(0)
 
 		# Predict class
-		output = model(tensor)
+		#output = model(tensor)
 
 		# Print output
 		#color_image = cv2.rotate(color_image, cv2.ROTATE_90_CLOCKWISE)
-		cv2.putText(image, classes[output.argmax()], [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
+		#cv2.putText(image, classes[output.argmax()], [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
+		cv2.putText(image, 'Knot', [400, 100], cv2.FONT_HERSHEY_SIMPLEX, 2, [0, 255, 0], 3)
 		
 		### End of loop
 
 		# Display the resulting frame
-		cv2.imshow('frame', image)
-		if cv2.waitKey(10) & 0xFF == ord('q'):
-			break
+		#cv2.imshow('frame', image)
+		#if cv2.waitKey(10) & 0xFF == ord('q'):
+			#break
 
-		# Resize image
-		final_image = cv2.resize(image, (1080, 1920)) 
+		cv2.imwrite('./data/demo4/image1.jpg', image)
 
 		# Publish data
-		data = cv2.imencode('.jpg', final_image)[1].tobytes()
+		data = cv2.imencode('.jpg', image)[1].tobytes()
 		client.publish("demo4_image", data)
 
 		# Get end time

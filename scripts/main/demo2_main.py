@@ -77,11 +77,8 @@ while True:
 	#if cv2.waitKey(10) & 0xFF == ord('q'):
 		#break
 
-	# Resize image
-	final_image = cv2.resize(image, (1080, 1920)) 
-
 	# Publish data
-	data = cv2.imencode('.jpg', final_image)[1].tobytes()
+	data = cv2.imencode('.jpg', image)[1].tobytes()
 	client.publish("demo2_image", data)
 
 	# Get end time
