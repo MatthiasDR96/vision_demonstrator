@@ -1,7 +1,6 @@
 # Imports
 import cv2
 import time
-import yaml
 import pickle
 import pandas as pd
 import paho.mqtt.client as mqtt
@@ -41,21 +40,32 @@ while True:
 	# Get frame
 	image, _ = cam.read()
 
+	cv2.imwrite("./data/demo3/image0.jpg", image)
+
 	# Extract resistor bounding box
 	ret, rect, debug1 = extract_resistor(image)
+
+	cv2.imwrite("./data/demo3/image3.jpg", debug1)
 
 	# Extract cropped bands
 	ret, crop, debug2 = align_resistor(image, rect)
 
+	cv2.imwrite("./data/demo3/image4.jpg", debug2)
+
 	# Extract color band contours
 	ret, bands, debug3 = extract_color_bands(debug1, crop)
+
+	cv2.imwrite("./data/demo3/image10.jpg", debug3)
 
 	# Iterate over first three contours
 	prediction = ''
 	for band in bands:
 
 		# Predict
-		pred = model.predict([band])
+		try:
+			pred = model.predict([band])
+		except:
+			pass
 
 		# Convert to class
 		prediction += labelencoder.inverse_transform(pred)[0]
@@ -66,9 +76,14 @@ while True:
 	### End of loop
 
 	# Display the resulting frame
-	#cv2.imshow('frame', debug3)
-	#if cv2.waitKey(10) & 0xFF == ord('q'):
-		#break 
+	final_image = cv2.resize(debug3, (int(1920/2), int(1080/2))) 
+	cv2.imshow('frame', final_image)
+	cv2.resizeWindow("frame", (int(1920/2), int(1080/2)))  
+	cv2.moveWindow("frame", 0, int(1080/2))
+	if cv2.waitKey(10) & 0xFF == ord('q'):
+		break 
+
+	cv2.imwrite("./data/demo3/image11.jpg", final_image)
 
 	# Publish data
 	data = cv2.imencode('.jpg', debug3)[1].tobytes()

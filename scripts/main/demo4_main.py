@@ -82,11 +82,12 @@ with torch.no_grad():
 		### End of loop
 
 		# Display the resulting frame
-		#cv2.imshow('frame', image)
-		#if cv2.waitKey(10) & 0xFF == ord('q'):
-			#break
-
-		cv2.imwrite('./data/demo4/image1.jpg', image)
+		final_image = cv2.resize(image, (int(1920/2), int(1080/2))) 
+		cv2.imshow('frame', final_image)
+		cv2.resizeWindow("frame", (int(1920/2), int(1080/2)))  
+		cv2.moveWindow("frame", int(1920/2), int(1080/2))
+		if cv2.waitKey(10) & 0xFF == ord('q'):
+			break 
 
 		# Publish data
 		data = cv2.imencode('.jpg', image)[1].tobytes()

@@ -107,6 +107,14 @@ while True:
 
 	### End of loop
 
+	# Display the resulting frame
+	final_image = cv2.resize(final_image, (int(1920/2), int(1080/2)))  
+	cv2.imshow('frame', final_image)
+	cv2.resizeWindow("frame", (int(1920/2), int(1080/2)))  
+	cv2.moveWindow("frame", 0, 0)
+	if cv2.waitKey(10) & 0xFF == ord('q'):
+		break 
+
 	# Publish data
 	data = cv2.imencode('.jpg', final_image)[1].tobytes()
 	client.publish("demo1_image", data)

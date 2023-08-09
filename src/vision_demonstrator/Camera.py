@@ -157,16 +157,20 @@ class CameraIDS:
 
 	def start(self):
 
+		# Set parameters
 		self.remote_device_nodemap.FindNode("TriggerSelector").SetCurrentEntry("ExposureStart")
 		self.remote_device_nodemap.FindNode("TriggerSource").SetCurrentEntry("Software")
 		self.remote_device_nodemap.FindNode("TriggerMode").SetCurrentEntry("On")
+		#self.remote_device_nodemap.LoadFromFile("../config/camera_setup.cset")
 
+		# Start stream
 		self.datastream = self.device.DataStreams()[0].OpenDataStream()
 		payload_size = self.remote_device_nodemap.FindNode("PayloadSize").Value()
 		for _ in range(self.datastream.NumBuffersAnnouncedMinRequired()):
 			buffer = self.datastream.AllocAndAnnounceBuffer(payload_size)
 			self.datastream.QueueBuffer(buffer)
 
+		# Start acquisition
 		self.datastream.StartAcquisition()
 		self.remote_device_nodemap.FindNode("AcquisitionStart").Execute()
 		self.remote_device_nodemap.FindNode("AcquisitionStart").WaitUntilDone()

@@ -13,18 +13,11 @@ Software for the vision demonstrator of KU Leuven Bruges
 * C:\Program Files\IDS\ids_peak\generic_sdk\afl\binding\python\wheel\x86_64
 * Do 'pip install ids_peak_afl-1.1.0.0-cp38-cp38-win_amd64.whl'
 
+### Connection to Omron Vision Controller
+
+Set netwerk adapter to IP 10.5.5.110 with mask 255.255.255.0
+
 ## Run demo
 
-To run the demo, each of the main scripts can be executed using the bash scripts in 'bash'. All script will publish their output to a MQTT server that is subscribed by the webserver. The result of the webserver is visible via 'localhost:5000'.
+To run the demo, each of the main scripts can be executed using the bash scripts in 'bash'. All scripts will publish their output to a MQTT server that is subscribed by the webserver. The result of the webserver is visible via 'localhost:5000'.
 
-### bash 
-
-### config
-
-### data
-
-### scripts
-
-### src
-
-### webserver

@@ -9,24 +9,29 @@ def extract_resistor(image):
 	image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 	# Threshold background
-	_, threshed = cv2.threshold(image_gray, 230, 255, cv2.THRESH_BINARY_INV)
+	_, threshed = cv2.threshold(image_gray, 254, 255, cv2.THRESH_BINARY_INV)
+
+	cv2.imwrite("./data/demo3/image1.jpg", threshed)
 
 	# Morphological transformations to remove sticks
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15,15))
 	morphed_open = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel)
 	image_thresh = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
 
+	cv2.imwrite("./data/demo3/image2.jpg", image_thresh)
+
 	# Find contour of resistor
 	contours = cv2.findContours(image_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+
+	# Filter contours
+	contours = list(filter(lambda x: (cv2.contourArea(x) < 20000), contours)) 
+	contours = list(filter(lambda x: (cv2.contourArea(x) > 5000), contours)) 
 
 	# Check if there are contours
 	if len(contours) == 0: return False, None, image
 
 	# Get largest contour
 	maxcontour = max(contours, key=cv2.contourArea)
-
-	# Check if contours are too big or too small
-	if cv2.contourArea(maxcontour) > 20000 or cv2.contourArea(maxcontour) < 10000: return False, None, image
 
 	# Get minimal area rectangle
 	rect = cv2.minAreaRect(maxcontour)
@@ -90,10 +95,16 @@ def extract_color_bands(image, crop):
 	mask2 = cv2.inRange(hsv, np.array([hsvfile2[0], hsvfile2[2], hsvfile2[4]]), np.array([hsvfile2[1], hsvfile2[3], hsvfile2[5]]))
 	mask = cv2.bitwise_and(mask1, mask2)
 
+	cv2.imwrite("./data/demo3/image5.jpg", mask1)
+	cv2.imwrite("./data/demo3/image6.jpg", mask2)
+	cv2.imwrite("./data/demo3/image7.jpg", mask)
+
 	# Morphological transformations to remove sticks
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
 	morphed_open = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 	mask = cv2.morphologyEx(morphed_open, cv2.MORPH_CLOSE, kernel)
+
+	cv2.imwrite("./data/demo3/image8.jpg", mask)
 	
 	# Find the three largest contours of the color bands
 	contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -123,6 +134,8 @@ def extract_color_bands(image, crop):
 
 	# Plot
 	crop_ = cv2.drawContours(crop.copy(), sorted_contours, -1, (0,255,0), 3)
+
+	cv2.imwrite("./data/demo3/image9.jpg", crop_)
 
 	# Debug image
 	debug_image = image.copy()
