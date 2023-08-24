@@ -15,7 +15,12 @@ Software for the vision demonstrator of KU Leuven Bruges
 
 ### Connection to Omron Vision Controller
 
-Set netwerk adapter to IP 10.5.5.110 with mask 255.255.255.0
+The default ip address of the OMRON controller is 10.5.5.100. To connect using this configuration, set the netwerk adapter to IP 10.5.5.110 with mask 255.255.255.0.
+When the switch is used, the configuration of the OMRON controller is put to dynamic DHCP, as well as the configuration of the host PC. The OMRON controller takes the address 169.254.122.41.
+
+169### Connection to Cognex 
+
+The default ip address of the Cognex camera 169.254.7.205. To connect using this configuration, set the netwerk adapter to dynamic DHCP.
 
 ## Run demo
 

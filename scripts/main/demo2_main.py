@@ -17,7 +17,7 @@ client.connect("mqtt.eclipseprojects.io")
 client.max_queued_messages_set(1)
 
 # Params
-host = '10.5.5.100'
+host = '169.254.122.41' #'10.5.5.100'
 port = 9876
 
 # Start measuring
