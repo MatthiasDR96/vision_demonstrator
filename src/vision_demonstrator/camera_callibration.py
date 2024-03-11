@@ -17,8 +17,12 @@ def extrinsic_calibration(img, mtx, dist):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Get chessboard corners
-    ret, corners = cv2.findChessboardCornersSB(gray, (9, 14), cv2.CALIB_CB_MARKER)
-
+    try:
+        ret, corners = cv2.findChessboardCornersSB(gray, (9, 14), cv2.CALIB_CB_MARKER)
+    except:
+        print("Camera failed")
+        return None, None, None, None, None
+    
     # If corners are found
     if ret == True:
         

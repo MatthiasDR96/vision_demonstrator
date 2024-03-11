@@ -11,11 +11,6 @@ import paho.mqtt.client as mqtt
 # Script rate
 rate = 0.5 # Seconds per loop
 
-# Init MQTT server
-client = mqtt.Client(client_id="", clean_session=True, userdata=None)
-client.connect("mqtt.eclipseprojects.io")
-client.max_queued_messages_set(1)
-
 # Params
 host = '169.254.122.41' #'10.5.5.100'
 port = 9876
@@ -87,10 +82,6 @@ try:
 		cv2.moveWindow("frame", int(1920/2), 0)
 		if cv2.waitKey(10) & 0xFF == ord('q'):
 			break 
-
-		# Publish data
-		data = cv2.imencode('.jpg', image)[1].tobytes()
-		client.publish("demo2_image", data)
 
 		# Get end time
 		t2 = time.time()

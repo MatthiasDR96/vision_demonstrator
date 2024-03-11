@@ -15,11 +15,6 @@ rate = 0.5 # Seconds per loop
 # Create camera object
 cam = Camera('IDS', 0, 0, 0, 0)
 
-# Init MQTT server
-client = mqtt.Client(client_id="", clean_session=True, userdata=None)
-client.connect("mqtt.eclipseprojects.io")
-client.max_queued_messages_set(1)
-
 # Load data
 df = pd.read_csv("data/color_data.csv")
 
@@ -40,22 +35,22 @@ while True:
 	# Get frame
 	image, _ = cam.read()
 
-	cv2.imwrite("./data/demo3/image0.jpg", image)
+	cv2.imwrite("./data/demo3/image_raw.jpg", image)
 
 	# Extract resistor bounding box
 	ret, rect, debug1 = extract_resistor(image)
 
-	cv2.imwrite("./data/demo3/image3.jpg", debug1)
+	cv2.imwrite("./data/demo3/image_mask_bg.jpg", debug1)
 
 	# Extract cropped bands
 	ret, crop, debug2 = align_resistor(image, rect)
 
-	cv2.imwrite("./data/demo3/image4.jpg", debug2)
+	cv2.imwrite("./data/demo3/image_aligned.jpg", debug2)
 
 	# Extract color band contours
 	ret, bands, debug3 = extract_color_bands(debug1, crop)
 
-	cv2.imwrite("./data/demo3/image10.jpg", debug3)
+	cv2.imwrite("./data/demo3/image_contours.jpg", debug3)
 
 	# Iterate over first three contours
 	prediction = ''
@@ -83,11 +78,7 @@ while True:
 	if cv2.waitKey(10) & 0xFF == ord('q'):
 		break 
 
-	cv2.imwrite("./data/demo3/image11.jpg", final_image)
-
-	# Publish data
-	data = cv2.imencode('.jpg', debug3)[1].tobytes()
-	client.publish("demo3_image", data)
+	cv2.imwrite("./data/demo3/image_final.jpg", final_image)
 
 	# Get end time
 	t2 = time.time()

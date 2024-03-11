@@ -17,11 +17,6 @@ with open("config/demo1_config.yaml", 'r') as stream: config = yaml.safe_load(st
 # Create camera object
 cam = Camera('RealSense', config['color_resolution'], config['depth_resolution'], config['frames_per_second'], config['id'])
 
-# Init MQTT server
-client = mqtt.Client(client_id="", clean_session=True, userdata=None)
-client.connect("mqtt.eclipseprojects.io")
-client.max_queued_messages_set(1)
-
 # Get HSV calibration params 
 hsvfile = np.load('data/demo1_hsv.npy')
 
@@ -114,10 +109,6 @@ while True:
 	cv2.moveWindow("frame", 0, 0)
 	if cv2.waitKey(10) & 0xFF == ord('q'):
 		break 
-
-	# Publish data
-	data = cv2.imencode('.jpg', final_image)[1].tobytes()
-	client.publish("demo1_image", data)
 
 	# Get end time
 	t2 = time.time()
